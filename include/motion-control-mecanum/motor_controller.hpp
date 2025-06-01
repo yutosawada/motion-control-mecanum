@@ -39,6 +39,9 @@ class MotorController {
   // Set target velocity in Profile Velocity Mode (object 0x60FF).
   bool SetTargetVelocity(int32_t velocity);
 
+  // Set the Profile Velocity parameter (object 0x6081).
+  bool SetProfileVelocity(int32_t velocity);
+
  private:
   bool SendControlWord(uint16_t control_value);
   bool SdoTransaction(const std::vector<uint8_t> & request,
