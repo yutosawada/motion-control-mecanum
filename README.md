@@ -9,3 +9,4 @@ This package provides a simple example of a mecanum wheel motion controller for 
 * Ability to configure the velocity threshold (`0x606F`).
 * Ability to configure the velocity window (`0x606D`).
 * Ability to configure the quick stop option code (`0x605A`).
+* Ability to configure the quick stop deceleration (`0x6085`).

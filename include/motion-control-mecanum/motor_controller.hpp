@@ -59,6 +59,9 @@ class MotorController {
   // Set Quick stop option code (object 0x605A).
   bool SetQuickStopOptionCode(QuickStopOptionCode option);
 
+  // Set Quick stop deceleration (object 0x6085).
+  bool SetQuickStopDeceleration(uint32_t deceleration);
+
  private:
   bool SendControlWord(uint16_t control_value);
   bool SdoTransaction(const std::vector<uint8_t> & request,

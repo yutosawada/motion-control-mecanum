@@ -255,6 +255,32 @@ bool MotorController::SetQuickStopOptionCode(QuickStopOptionCode option)
   return true;
 }
 
+bool MotorController::SetQuickStopDeceleration(uint32_t deceleration)
+{
+  const uint16_t kQuickStopDecelObject = 0x6085;
+  const uint8_t kQuickStopDecelSubindex = 0x00;
+
+  std::vector<uint8_t> request_data = {
+    motor_controller::kSdoDownload4byteCmd,
+    static_cast<uint8_t>(kQuickStopDecelObject & 0xFF),
+    static_cast<uint8_t>((kQuickStopDecelObject >> 8) & 0xFF),
+    kQuickStopDecelSubindex,
+    static_cast<uint8_t>(deceleration & 0xFF),
+    static_cast<uint8_t>((deceleration >> 8) & 0xFF),
+    static_cast<uint8_t>((deceleration >> 16) & 0xFF),
+    static_cast<uint8_t>((deceleration >> 24) & 0xFF)};
+
+  std::vector<uint8_t> response_data;
+  if (!SdoTransaction(request_data,
+      motor_controller::kSdoExpectedResponseDownload, response_data))
+  {
+    RCLCPP_ERROR(logger_, "SetQuickStopDeceleration(%u): failed",
+      static_cast<unsigned>(node_id_));
+    return false;
+  }
+  return true;
+}
+
 bool MotorController::readStatusword(uint16_t * out_status)
 {
   static const uint8_t kSdoUploadRequestCmd = 0x40;
