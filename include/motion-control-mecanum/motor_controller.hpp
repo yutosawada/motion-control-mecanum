@@ -39,6 +39,9 @@ class MotorController {
   // Set target velocity in Profile Velocity Mode (object 0x60FF).
   bool SetTargetVelocity(int32_t velocity);
 
+  // Set the Quick stop option code (object 0x605A).
+  bool SetQuickStopOptionCode(int16_t option);
+
  private:
   bool SendControlWord(uint16_t control_value);
   bool SdoTransaction(const std::vector<uint8_t> & request,
