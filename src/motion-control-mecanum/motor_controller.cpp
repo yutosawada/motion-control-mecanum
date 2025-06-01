@@ -127,6 +127,55 @@ bool MotorController::DisableOperation(uint8_t node_id)
   return SendControlWord(node_id, motor_controller::kDisableOperationValue);
 }
 
+bool MotorController::SetModeOfOperation(uint8_t node_id, OperationMode mode)
+{
+  const uint16_t kModeObject = 0x6060;
+  const uint8_t kModeSubindex = 0x00;
+
+  std::vector<uint8_t> request_data = {
+    motor_controller::kSdoDownload1byteCmd,
+    static_cast<uint8_t>(kModeObject & 0xFF),
+    static_cast<uint8_t>((kModeObject >> 8) & 0xFF),
+    kModeSubindex,
+    static_cast<uint8_t>(mode),
+    0x00, 0x00, 0x00};
+
+  std::vector<uint8_t> response_data;
+  if (!SdoTransaction(node_id, request_data,
+      motor_controller::kSdoExpectedResponseDownload, response_data))
+  {
+    RCLCPP_ERROR(logger_, "SetModeOfOperation(%u): failed", static_cast<unsigned>(node_id));
+    return false;
+  }
+  RCLCPP_INFO(logger_, "SetModeOfOperation(%u): mode %d", static_cast<unsigned>(node_id), static_cast<int>(mode));
+  return true;
+}
+
+bool MotorController::SetTargetVelocity(uint8_t node_id, int32_t velocity)
+{
+  const uint16_t kTargetVelocityObject = 0x60FF;
+  const uint8_t kTargetVelocitySubindex = 0x00;
+
+  std::vector<uint8_t> request_data = {
+    motor_controller::kSdoDownload4byteCmd,
+    static_cast<uint8_t>(kTargetVelocityObject & 0xFF),
+    static_cast<uint8_t>((kTargetVelocityObject >> 8) & 0xFF),
+    kTargetVelocitySubindex,
+    static_cast<uint8_t>(velocity & 0xFF),
+    static_cast<uint8_t>((velocity >> 8) & 0xFF),
+    static_cast<uint8_t>((velocity >> 16) & 0xFF),
+    static_cast<uint8_t>((velocity >> 24) & 0xFF)};
+
+  std::vector<uint8_t> response_data;
+  if (!SdoTransaction(node_id, request_data,
+      motor_controller::kSdoExpectedResponseDownload, response_data))
+  {
+    RCLCPP_ERROR(logger_, "SetTargetVelocity(%u): failed", static_cast<unsigned>(node_id));
+    return false;
+  }
+  return true;
+}
+
 bool MotorController::readStatusword(uint8_t node_id, uint16_t * out_status)
 {
   static const uint8_t kSdoUploadRequestCmd = 0x40;
