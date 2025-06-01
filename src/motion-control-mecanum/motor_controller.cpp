@@ -333,6 +333,32 @@ bool MotorController::SetProfileDeceleration(uint32_t deceleration)
   return true;
 }
 
+bool MotorController::SetEndVelocity(int32_t velocity)
+{
+  const uint16_t kEndVelocityObject = 0x6082;
+  const uint8_t kEndVelocitySubindex = 0x00;
+
+  std::vector<uint8_t> request_data = {
+    motor_controller::kSdoDownload4byteCmd,
+    static_cast<uint8_t>(kEndVelocityObject & 0xFF),
+    static_cast<uint8_t>((kEndVelocityObject >> 8) & 0xFF),
+    kEndVelocitySubindex,
+    static_cast<uint8_t>(velocity & 0xFF),
+    static_cast<uint8_t>((velocity >> 8) & 0xFF),
+    static_cast<uint8_t>((velocity >> 16) & 0xFF),
+    static_cast<uint8_t>((velocity >> 24) & 0xFF)};
+
+  std::vector<uint8_t> response_data;
+  if (!SdoTransaction(request_data,
+      motor_controller::kSdoExpectedResponseDownload, response_data))
+  {
+    RCLCPP_ERROR(logger_, "SetEndVelocity(%u): failed",
+      static_cast<unsigned>(node_id_));
+    return false;
+  }
+  return true;
+}
+
 bool MotorController::SetMaxTorque(uint16_t max_torque)
 {
   const uint16_t kMaxTorqueObject = 0x6072;
