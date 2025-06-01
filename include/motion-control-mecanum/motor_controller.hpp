@@ -39,6 +39,9 @@ class MotorController {
   // Set target velocity in Profile Velocity Mode (object 0x60FF).
   bool SetTargetVelocity(int32_t velocity);
 
+  // Set maximum torque (object 0x6072) in 0.1% units.
+  bool SetMaxTorque(uint16_t max_torque);
+
  private:
   bool SendControlWord(uint16_t control_value);
   bool SdoTransaction(const std::vector<uint8_t> & request,
