@@ -18,6 +18,17 @@ enum class OperationMode : int8_t {
   kHoming = 0x06
 };
 
+enum class QuickStopOptionCode : int16_t {
+  kCustomStopTime = -3,
+  kCustomStopRate = -2,
+  kImmediateStop = -1,
+  kImmediateDisableSwitch = 0,
+  kNormalRampDisableSwitch = 1,
+  kQuickStopRampDisableSwitch = 2,
+  kNormalRampStayQuickStop = 5,
+  kQuickStopRampStayQuickStop = 6
+};
+
 class MotorController {
  public:
   MotorController(std::shared_ptr<can_control::CanInterface> can, uint8_t node_id);
@@ -44,6 +55,9 @@ class MotorController {
 
   // Set velocity window (object 0x606D).
   bool SetVelocityWindow(uint16_t window);
+
+  // Set Quick stop option code (object 0x605A).
+  bool SetQuickStopOptionCode(QuickStopOptionCode option);
 
  private:
   bool SendControlWord(uint16_t control_value);
