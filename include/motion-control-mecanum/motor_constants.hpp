@@ -1,7 +1,7 @@
 #ifndef ORIENTAL_MOTOR_CONSTANTS_HPP_
 #define ORIENTAL_MOTOR_CONSTANTS_HPP_
 
-#include "motor_controller_interface.hpp"
+#include "motion-control-mecanum/motor_controller.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "can/can_interface.hpp"
 #include "can/socket_can_interface.hpp"

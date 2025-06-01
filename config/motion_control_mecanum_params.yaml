@@ -1,0 +1,36 @@
+/**:
+  ros__parameters:
+    can_interface_type: "SocketCAN"
+    can_device_name: "can0"
+    
+    motors:
+      - node_id: 1
+        position: "FL"  # Front-Left
+      - node_id: 2
+        position: "FR"  # Front-Right
+      - node_id: 3
+        position: "RL"  # Rear-Left
+      - node_id: 4
+        position: "RR"  # Rear-Right
+    
+    motor_parameters:
+      max_speed: 3000  # rpm
+      acceleration: 1000
+      deceleration: 1000
+      gear_ratio: 10.0
+      encoder_resolution: 4096
+    
+    wheel_parameters:
+      wheel_radius: 0.075  # m
+      wheel_distance_x: 0.3  # m
+      wheel_distance_y: 0.25  # m
+    
+    control_parameters:
+      control_frequency: 50.0  # Hz
+      max_linear_velocity_x: 1.0  # m/s
+      max_linear_velocity_y: 1.0  # m/s
+      max_angular_velocity: 1.5  # rad/s
+    
+    safety_parameters:
+      timeout_ms: 500
+      emergency_stop_enabled: true
