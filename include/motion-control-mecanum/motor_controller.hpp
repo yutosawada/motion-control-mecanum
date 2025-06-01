@@ -62,6 +62,9 @@ class MotorController {
   // Set Quick stop deceleration (object 0x6085).
   bool SetQuickStopDeceleration(uint32_t deceleration);
 
+  // Set maximum torque limit (object 0x6072).
+  bool SetMaxTorque(uint16_t max_torque);
+
  private:
   bool SendControlWord(uint16_t control_value);
   bool SdoTransaction(const std::vector<uint8_t> & request,
