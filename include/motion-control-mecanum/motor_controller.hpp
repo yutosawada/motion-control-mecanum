@@ -9,6 +9,14 @@
 
 namespace motion_control_mecanum {
 
+enum class OperationMode : int8_t {
+  kNoOperation = 0x00,
+  kProfilePosition = 0x01,
+  kProfileVelocity = 0x03,
+  kProfileTorque = 0x04,
+  kHoming = 0x06
+};
+
 class MotorController {
  public:
   explicit MotorController(std::shared_ptr<can_control::CanInterface> can);
@@ -23,6 +31,12 @@ class MotorController {
   bool EnableOperation(uint8_t node_id);
   bool DisableVoltage(uint8_t node_id);
   bool DisableOperation(uint8_t node_id);
+
+  // Set the DS402 Modes of Operation (object 0x6060).
+  bool SetModeOfOperation(uint8_t node_id, OperationMode mode);
+
+  // Set target velocity in Profile Velocity Mode (object 0x60FF).
+  bool SetTargetVelocity(uint8_t node_id, int32_t velocity);
 
  private:
   bool SendControlWord(uint8_t node_id, uint16_t control_value);
