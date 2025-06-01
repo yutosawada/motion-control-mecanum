@@ -13,7 +13,8 @@ MotionControllerNode::MotionControllerNode(const rclcpp::NodeOptions & options)
 
   motion_controller_ = std::make_shared<MotionController>(radius, sep_x, sep_y);
   auto can_if = std::make_shared<can_control::SocketCanInterface>(can_dev);
-  motor_controller_ = std::make_shared<MotorController>(can_if);
+  int node_id_param = this->declare_parameter("node_id", 1);
+  motor_controller_ = std::make_shared<MotorController>(can_if, static_cast<uint8_t>(node_id_param));
 
   cmd_vel_sub_ = create_subscription<geometry_msgs::msg::Twist>(
     "cmd_vel", rclcpp::QoS(10),

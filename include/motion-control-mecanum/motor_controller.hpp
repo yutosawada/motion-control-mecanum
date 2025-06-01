@@ -4,6 +4,7 @@
 #include <array>
 #include <memory>
 #include <vector>
+#include <cstdint>
 #include "rclcpp/rclcpp.hpp"
 #include "can/can_interface.hpp"
 
@@ -19,33 +20,33 @@ enum class OperationMode : int8_t {
 
 class MotorController {
  public:
-  explicit MotorController(std::shared_ptr<can_control::CanInterface> can);
+  MotorController(std::shared_ptr<can_control::CanInterface> can, uint8_t node_id);
 
   bool writeSpeeds(const std::array<double, 4> & speeds);
 
-  bool readStatusword(uint8_t node_id, uint16_t * out_status);
+  bool readStatusword(uint16_t * out_status);
 
-  bool FaultReset(uint8_t node_id);
-  bool Shutdown(uint8_t node_id);
-  bool SwitchOn(uint8_t node_id);
-  bool EnableOperation(uint8_t node_id);
-  bool DisableVoltage(uint8_t node_id);
-  bool DisableOperation(uint8_t node_id);
+  bool FaultReset();
+  bool Shutdown();
+  bool SwitchOn();
+  bool EnableOperation();
+  bool DisableVoltage();
+  bool DisableOperation();
 
   // Set the DS402 Modes of Operation (object 0x6060).
-  bool SetModeOfOperation(uint8_t node_id, OperationMode mode);
+  bool SetModeOfOperation(OperationMode mode);
 
   // Set target velocity in Profile Velocity Mode (object 0x60FF).
-  bool SetTargetVelocity(uint8_t node_id, int32_t velocity);
+  bool SetTargetVelocity(int32_t velocity);
 
  private:
-  bool SendControlWord(uint8_t node_id, uint16_t control_value);
-  bool SdoTransaction(uint8_t node_id,
-    const std::vector<uint8_t> & request,
+  bool SendControlWord(uint16_t control_value);
+  bool SdoTransaction(const std::vector<uint8_t> & request,
     uint8_t expected_cmd,
     std::vector<uint8_t> & response);
 
   std::shared_ptr<can_control::CanInterface> can_;
+  uint8_t node_id_;
   rclcpp::Logger logger_;
 };
 
