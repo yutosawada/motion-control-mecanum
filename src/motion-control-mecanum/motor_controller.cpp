@@ -3,8 +3,9 @@
 
 namespace motion_control_mecanum {
 
-MotorController::MotorController(std::shared_ptr<can_control::CanInterface> can)
+MotorController::MotorController(std::shared_ptr<can_control::CanInterface> can, uint8_t node_id)
 : can_(std::move(can)),
+  node_id_(node_id),
   logger_(rclcpp::get_logger("MotorController"))
 {
 }
@@ -29,14 +30,13 @@ bool MotorController::writeSpeeds(const std::array<double, 4> & speeds)
 }
 
 bool MotorController::SdoTransaction(
-  uint8_t node_id,
   const std::vector<uint8_t> & request,
   uint8_t expected_cmd,
   std::vector<uint8_t> & response)
 {
   can_control::CanFrame request_frame;
   request_frame.arbitration_id =
-    motor_controller::kSdoRequestBaseId + static_cast<uint32_t>(node_id);
+    motor_controller::kSdoRequestBaseId + static_cast<uint32_t>(node_id_);
   request_frame.dlc = motor_controller::kSdoDlc;
   request_frame.data = request;
 
@@ -51,7 +51,7 @@ bool MotorController::SdoTransaction(
     return false;
   }
   if (response_frame.arbitration_id !=
-    (motor_controller::kSdoResponseBaseId + static_cast<uint32_t>(node_id)))
+    (motor_controller::kSdoResponseBaseId + static_cast<uint32_t>(node_id_)))
   {
     RCLCPP_ERROR(logger_,
       "Unexpected SDO response CAN ID: 0x%X", response_frame.arbitration_id);
@@ -69,7 +69,7 @@ bool MotorController::SdoTransaction(
   return true;
 }
 
-bool MotorController::SendControlWord(uint8_t node_id, uint16_t control_value)
+bool MotorController::SendControlWord(uint16_t control_value)
 {
   const uint16_t kControlwordObject = 0x6040;
   const uint8_t kControlwordSubindex = 0x00;
@@ -85,49 +85,49 @@ bool MotorController::SendControlWord(uint8_t node_id, uint16_t control_value)
     0x00};
 
   std::vector<uint8_t> response_data;
-  if (!SdoTransaction(node_id, request_data,
+  if (!SdoTransaction(request_data,
       motor_controller::kSdoExpectedResponseDownload, response_data))
   {
     RCLCPP_ERROR(logger_, "SendControlWord(%u): Failed to send 0x%04X",
-      static_cast<unsigned>(node_id), control_value);
+      static_cast<unsigned>(node_id_), control_value);
     return false;
   }
   RCLCPP_INFO(logger_, "SendControlWord(%u): 0x%04X sent successfully.",
-    static_cast<unsigned>(node_id), control_value);
+    static_cast<unsigned>(node_id_), control_value);
   return true;
 }
 
-bool MotorController::FaultReset(uint8_t node_id)
+bool MotorController::FaultReset()
 {
-  return SendControlWord(node_id, motor_controller::kFaultResetValue);
+  return SendControlWord(motor_controller::kFaultResetValue);
 }
 
-bool MotorController::Shutdown(uint8_t node_id)
+bool MotorController::Shutdown()
 {
-  return SendControlWord(node_id, motor_controller::kShutdownValue);
+  return SendControlWord(motor_controller::kShutdownValue);
 }
 
-bool MotorController::SwitchOn(uint8_t node_id)
+bool MotorController::SwitchOn()
 {
-  return SendControlWord(node_id, motor_controller::kSwitchOnValue);
+  return SendControlWord(motor_controller::kSwitchOnValue);
 }
 
-bool MotorController::EnableOperation(uint8_t node_id)
+bool MotorController::EnableOperation()
 {
-  return SendControlWord(node_id, motor_controller::kEnableOperationValue);
+  return SendControlWord(motor_controller::kEnableOperationValue);
 }
 
-bool MotorController::DisableVoltage(uint8_t node_id)
+bool MotorController::DisableVoltage()
 {
-  return SendControlWord(node_id, motor_controller::kDisableVoltageValue);
+  return SendControlWord(motor_controller::kDisableVoltageValue);
 }
 
-bool MotorController::DisableOperation(uint8_t node_id)
+bool MotorController::DisableOperation()
 {
-  return SendControlWord(node_id, motor_controller::kDisableOperationValue);
+  return SendControlWord(motor_controller::kDisableOperationValue);
 }
 
-bool MotorController::SetModeOfOperation(uint8_t node_id, OperationMode mode)
+bool MotorController::SetModeOfOperation(OperationMode mode)
 {
   const uint16_t kModeObject = 0x6060;
   const uint8_t kModeSubindex = 0x00;
@@ -141,17 +141,17 @@ bool MotorController::SetModeOfOperation(uint8_t node_id, OperationMode mode)
     0x00, 0x00, 0x00};
 
   std::vector<uint8_t> response_data;
-  if (!SdoTransaction(node_id, request_data,
+  if (!SdoTransaction(request_data,
       motor_controller::kSdoExpectedResponseDownload, response_data))
   {
-    RCLCPP_ERROR(logger_, "SetModeOfOperation(%u): failed", static_cast<unsigned>(node_id));
+    RCLCPP_ERROR(logger_, "SetModeOfOperation(%u): failed", static_cast<unsigned>(node_id_));
     return false;
   }
-  RCLCPP_INFO(logger_, "SetModeOfOperation(%u): mode %d", static_cast<unsigned>(node_id), static_cast<int>(mode));
+  RCLCPP_INFO(logger_, "SetModeOfOperation(%u): mode %d", static_cast<unsigned>(node_id_), static_cast<int>(mode));
   return true;
 }
 
-bool MotorController::SetTargetVelocity(uint8_t node_id, int32_t velocity)
+bool MotorController::SetTargetVelocity(int32_t velocity)
 {
   const uint16_t kTargetVelocityObject = 0x60FF;
   const uint8_t kTargetVelocitySubindex = 0x00;
@@ -167,16 +167,16 @@ bool MotorController::SetTargetVelocity(uint8_t node_id, int32_t velocity)
     static_cast<uint8_t>((velocity >> 24) & 0xFF)};
 
   std::vector<uint8_t> response_data;
-  if (!SdoTransaction(node_id, request_data,
+  if (!SdoTransaction(request_data,
       motor_controller::kSdoExpectedResponseDownload, response_data))
   {
-    RCLCPP_ERROR(logger_, "SetTargetVelocity(%u): failed", static_cast<unsigned>(node_id));
+    RCLCPP_ERROR(logger_, "SetTargetVelocity(%u): failed", static_cast<unsigned>(node_id_));
     return false;
   }
   return true;
 }
 
-bool MotorController::readStatusword(uint8_t node_id, uint16_t * out_status)
+bool MotorController::readStatusword(uint16_t * out_status)
 {
   static const uint8_t kSdoUploadRequestCmd = 0x40;
   static const uint16_t kStatuswordObject = 0x6041;
@@ -190,7 +190,7 @@ bool MotorController::readStatusword(uint8_t node_id, uint16_t * out_status)
     0x00, 0x00, 0x00, 0x00};
 
   std::vector<uint8_t> response_data;
-  if (!SdoTransaction(node_id, request_data,
+  if (!SdoTransaction(request_data,
     motor_controller::kSdoExpectedResponseUpload, response_data))
   {
     return false;
