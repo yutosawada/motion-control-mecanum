@@ -14,3 +14,4 @@ This package provides a simple example of a mecanum wheel motion controller for 
 * Ability to configure the profile acceleration (`0x6083`).
 * Ability to configure the profile deceleration (`0x6084`).
 * Ability to configure the end velocity (`0x6082`).
+* Ability to configure the profile velocity (`0x6081`).

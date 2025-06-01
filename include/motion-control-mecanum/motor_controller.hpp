@@ -71,6 +71,9 @@ class MotorController {
   // Set end velocity (object 0x6082).
   bool SetEndVelocity(int32_t velocity);
 
+  // Set profile velocity (object 0x6081).
+  bool SetProfileVelocity(int32_t velocity);
+
   // Set maximum torque limit (object 0x6072).
   bool SetMaxTorque(uint16_t max_torque);
 
