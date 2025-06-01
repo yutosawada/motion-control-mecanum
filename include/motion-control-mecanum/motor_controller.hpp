@@ -62,6 +62,9 @@ class MotorController {
   // Set Quick stop deceleration (object 0x6085).
   bool SetQuickStopDeceleration(uint32_t deceleration);
 
+  // Set profile acceleration (object 0x6083).
+  bool SetProfileAcceleration(uint32_t acceleration);
+
   // Set profile deceleration (object 0x6084).
   bool SetProfileDeceleration(uint32_t deceleration);
 
