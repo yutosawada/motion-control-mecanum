@@ -69,6 +69,64 @@ bool MotorController::SdoTransaction(
   return true;
 }
 
+bool MotorController::SendControlWord(uint8_t node_id, uint16_t control_value)
+{
+  const uint16_t kControlwordObject = 0x6040;
+  const uint8_t kControlwordSubindex = 0x00;
+
+  std::vector<uint8_t> request_data = {
+    motor_controller::kSdoDownload2byteCmd,
+    static_cast<uint8_t>(kControlwordObject & 0xFF),
+    static_cast<uint8_t>((kControlwordObject >> 8) & 0xFF),
+    kControlwordSubindex,
+    static_cast<uint8_t>(control_value & 0xFF),
+    static_cast<uint8_t>((control_value >> 8) & 0xFF),
+    0x00,
+    0x00};
+
+  std::vector<uint8_t> response_data;
+  if (!SdoTransaction(node_id, request_data,
+      motor_controller::kSdoExpectedResponseDownload, response_data))
+  {
+    RCLCPP_ERROR(logger_, "SendControlWord(%u): Failed to send 0x%04X",
+      static_cast<unsigned>(node_id), control_value);
+    return false;
+  }
+  RCLCPP_INFO(logger_, "SendControlWord(%u): 0x%04X sent successfully.",
+    static_cast<unsigned>(node_id), control_value);
+  return true;
+}
+
+bool MotorController::FaultReset(uint8_t node_id)
+{
+  return SendControlWord(node_id, motor_controller::kFaultResetValue);
+}
+
+bool MotorController::Shutdown(uint8_t node_id)
+{
+  return SendControlWord(node_id, motor_controller::kShutdownValue);
+}
+
+bool MotorController::SwitchOn(uint8_t node_id)
+{
+  return SendControlWord(node_id, motor_controller::kSwitchOnValue);
+}
+
+bool MotorController::EnableOperation(uint8_t node_id)
+{
+  return SendControlWord(node_id, motor_controller::kEnableOperationValue);
+}
+
+bool MotorController::DisableVoltage(uint8_t node_id)
+{
+  return SendControlWord(node_id, motor_controller::kDisableVoltageValue);
+}
+
+bool MotorController::DisableOperation(uint8_t node_id)
+{
+  return SendControlWord(node_id, motor_controller::kDisableOperationValue);
+}
+
 bool MotorController::readStatusword(uint8_t node_id, uint16_t * out_status)
 {
   static const uint8_t kSdoUploadRequestCmd = 0x40;
