@@ -17,7 +17,15 @@ class MotorController {
 
   bool readStatusword(uint8_t node_id, uint16_t * out_status);
 
+  bool FaultReset(uint8_t node_id);
+  bool Shutdown(uint8_t node_id);
+  bool SwitchOn(uint8_t node_id);
+  bool EnableOperation(uint8_t node_id);
+  bool DisableVoltage(uint8_t node_id);
+  bool DisableOperation(uint8_t node_id);
+
  private:
+  bool SendControlWord(uint8_t node_id, uint16_t control_value);
   bool SdoTransaction(uint8_t node_id,
     const std::vector<uint8_t> & request,
     uint8_t expected_cmd,
