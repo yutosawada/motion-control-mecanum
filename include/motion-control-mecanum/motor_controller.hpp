@@ -42,6 +42,9 @@ class MotorController {
   // Set velocity threshold (object 0x606F).
   bool SetVelocityThreshold(uint16_t threshold);
 
+  // Set velocity window (object 0x606D).
+  bool SetVelocityWindow(uint16_t window);
+
  private:
   bool SendControlWord(uint16_t control_value);
   bool SdoTransaction(const std::vector<uint8_t> & request,

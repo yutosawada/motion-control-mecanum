@@ -7,3 +7,4 @@ This package provides a simple example of a mecanum wheel motion controller for 
 * Support for setting the DS402 *Modes of Operation* object (`0x6060`).
 * Ability to command target velocity using Profile Velocity Mode (`0x60FF`).
 * Ability to configure the velocity threshold (`0x606F`).
+* Ability to configure the velocity window (`0x606D`).

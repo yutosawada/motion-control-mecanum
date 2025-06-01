@@ -202,6 +202,32 @@ bool MotorController::SetVelocityThreshold(uint16_t threshold)
   return true;
 }
 
+bool MotorController::SetVelocityWindow(uint16_t window)
+{
+  const uint16_t kVelocityWindowObject = 0x606D;
+  const uint8_t kVelocityWindowSubindex = 0x00;
+
+  std::vector<uint8_t> request_data = {
+    motor_controller::kSdoDownload2byteCmd,
+    static_cast<uint8_t>(kVelocityWindowObject & 0xFF),
+    static_cast<uint8_t>((kVelocityWindowObject >> 8) & 0xFF),
+    kVelocityWindowSubindex,
+    static_cast<uint8_t>(window & 0xFF),
+    static_cast<uint8_t>((window >> 8) & 0xFF),
+    0x00,
+    0x00};
+
+  std::vector<uint8_t> response_data;
+  if (!SdoTransaction(request_data,
+      motor_controller::kSdoExpectedResponseDownload, response_data))
+  {
+    RCLCPP_ERROR(logger_, "SetVelocityWindow(%u): failed",
+      static_cast<unsigned>(node_id_));
+    return false;
+  }
+  return true;
+}
+
 bool MotorController::readStatusword(uint16_t * out_status)
 {
   static const uint8_t kSdoUploadRequestCmd = 0x40;
