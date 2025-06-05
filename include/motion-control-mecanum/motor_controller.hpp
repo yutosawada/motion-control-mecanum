@@ -6,7 +6,6 @@
 #include <vector>
 #include <cstdint>
 #include "rclcpp/rclcpp.hpp"
-#include "can/can_interface.hpp"
 
 namespace motion_control_mecanum {
 
@@ -31,7 +30,7 @@ enum class QuickStopOptionCode : int16_t {
 
 class MotorController {
  public:
-  MotorController(std::shared_ptr<can_control::CanInterface> can, uint8_t node_id);
+  explicit MotorController(uint8_t node_id);
 
   bool writeSpeeds(const std::array<double, 4> & speeds);
 
@@ -83,7 +82,6 @@ class MotorController {
     uint8_t expected_cmd,
     std::vector<uint8_t> & response);
 
-  std::shared_ptr<can_control::CanInterface> can_;
   uint8_t node_id_;
   rclcpp::Logger logger_;
 };

@@ -1,5 +1,4 @@
 #include "motion-control-mecanum/motion_controller_node.hpp"
-#include "can/socket_can_interface.hpp"
 
 namespace motion_control_mecanum {
 
@@ -12,9 +11,9 @@ MotionControllerNode::MotionControllerNode(const rclcpp::NodeOptions & options)
   std::string can_dev = this->declare_parameter<std::string>("can_device", "can0");
 
   motion_controller_ = std::make_shared<MotionController>(radius, sep_x, sep_y);
-  auto can_if = std::make_shared<can_control::SocketCanInterface>(can_dev);
   int node_id_param = this->declare_parameter("node_id", 1);
-  motor_controller_ = std::make_shared<MotorController>(can_if, static_cast<uint8_t>(node_id_param));
+  (void)can_dev;
+  motor_controller_ = std::make_shared<MotorController>(static_cast<uint8_t>(node_id_param));
 
   cmd_vel_sub_ = create_subscription<geometry_msgs::msg::Twist>(
     "cmd_vel", rclcpp::QoS(10),

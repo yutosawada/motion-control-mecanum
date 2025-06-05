@@ -3,8 +3,6 @@
 
 #include "motion-control-mecanum/motor_controller.hpp"
 #include "rclcpp/rclcpp.hpp"
-#include "can/can_interface.hpp"
-#include "can/socket_can_interface.hpp"
 #include <string>  // std::string 利用のため
 
 namespace motor_controller
