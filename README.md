@@ -17,3 +17,4 @@ This package provides a simple example of a mecanum wheel motion controller for 
 * Ability to configure the profile velocity (`0x6081`).
 * Ability to read the torque actual value (`0x6077`).
 * Ability to read the velocity actual value (`0x606C`).
+* Servo ON/OFF services to control motor power state.
