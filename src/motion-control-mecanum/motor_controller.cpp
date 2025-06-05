@@ -444,4 +444,68 @@ bool MotorController::readStatusword(uint16_t * out_status)
   return true;
 }
 
+bool MotorController::GetTorqueActualValue(int16_t * out_torque)
+{
+  static const uint8_t kSdoUploadRequestCmd = 0x40;
+  static const uint16_t kTorqueActualObject = 0x6077;
+  static const uint8_t kTorqueActualSubindex = 0x00;
+
+  std::vector<uint8_t> request_data = {
+    kSdoUploadRequestCmd,
+    static_cast<uint8_t>(kTorqueActualObject & 0xFF),
+    static_cast<uint8_t>((kTorqueActualObject >> 8) & 0xFF),
+    kTorqueActualSubindex,
+    0x00, 0x00, 0x00, 0x00};
+
+  std::vector<uint8_t> response_data;
+  if (!SdoTransaction(request_data,
+    motor_controller::kSdoExpectedResponseUpload, response_data))
+  {
+    return false;
+  }
+
+  if (response_data.size() < 8) {
+    return false;
+  }
+
+  uint32_t raw = response_data[4] |
+    (response_data[5] << 8) |
+    (response_data[6] << 16) |
+    (response_data[7] << 24);
+  *out_torque = static_cast<int16_t>(raw & 0xFFFF);
+  return true;
+}
+
+bool MotorController::GetVelocityActualValue(int32_t * out_velocity)
+{
+  static const uint8_t kSdoUploadRequestCmd = 0x40;
+  static const uint16_t kVelocityActualObject = 0x606C;
+  static const uint8_t kVelocityActualSubindex = 0x00;
+
+  std::vector<uint8_t> request_data = {
+    kSdoUploadRequestCmd,
+    static_cast<uint8_t>(kVelocityActualObject & 0xFF),
+    static_cast<uint8_t>((kVelocityActualObject >> 8) & 0xFF),
+    kVelocityActualSubindex,
+    0x00, 0x00, 0x00, 0x00};
+
+  std::vector<uint8_t> response_data;
+  if (!SdoTransaction(request_data,
+    motor_controller::kSdoExpectedResponseUpload, response_data))
+  {
+    return false;
+  }
+
+  if (response_data.size() < 8) {
+    return false;
+  }
+
+  uint32_t raw = response_data[4] |
+    (response_data[5] << 8) |
+    (response_data[6] << 16) |
+    (response_data[7] << 24);
+  *out_velocity = static_cast<int32_t>(raw);
+  return true;
+}
+
 }  // namespace motion_control_mecanum

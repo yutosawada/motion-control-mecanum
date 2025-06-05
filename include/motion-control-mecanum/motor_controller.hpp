@@ -37,6 +37,12 @@ class MotorController {
 
   bool readStatusword(uint16_t * out_status);
 
+  // Get the actual torque value (object 0x6077).
+  bool GetTorqueActualValue(int16_t * out_torque);
+
+  // Get the actual velocity value (object 0x606C).
+  bool GetVelocityActualValue(int32_t * out_velocity);
+
   bool FaultReset();
   bool Shutdown();
   bool SwitchOn();
