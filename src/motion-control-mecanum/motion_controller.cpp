@@ -51,4 +51,33 @@ bool MotionController::writeSpeeds(const std::array<double, 4> & speeds)
   return false;
 }
 
+bool MotionController::servoOn()
+{
+  bool success = true;
+  for (auto & mc : motor_controllers_) {
+    if (mc) {
+      if (!mc->SwitchOn()) {
+        success = false;
+      }
+      if (!mc->EnableOperation()) {
+        success = false;
+      }
+    }
+  }
+  return success;
+}
+
+bool MotionController::servoOff()
+{
+  bool success = true;
+  for (auto & mc : motor_controllers_) {
+    if (mc) {
+      if (!mc->DisableOperation()) {
+        success = false;
+      }
+    }
+  }
+  return success;
+}
+
 }  // namespace motion_control_mecanum

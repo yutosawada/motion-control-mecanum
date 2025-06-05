@@ -26,6 +26,10 @@ class MotionController {
 
   bool writeSpeeds(const std::array<double, 4> & speeds);
 
+  bool servoOn();
+
+  bool servoOff();
+
  private:
   double wheel_radius_;
   double wheel_separation_x_;
