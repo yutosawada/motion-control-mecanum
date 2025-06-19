@@ -21,11 +21,16 @@ MotionControllerNode::MotionControllerNode(const rclcpp::NodeOptions& options)
   this->declare_parameter("control_parameters.max_linear_velocity_x", 1.0);
   this->declare_parameter("control_parameters.max_linear_velocity_y", 1.0);
   this->declare_parameter("control_parameters.max_angular_velocity", 1.5);
-
-  double radius = this->declare_parameter("wheel_radius", 0.075);
-  double sep_x = this->declare_parameter("wheel_separation_x", 0.30);
-  double sep_y = this->declare_parameter("wheel_separation_y", 0.25);
-  std::string can_dev =
+  
+  WheelParameters wheel_params;
+  wheel_params.radius =
+      this->declare_parameter<double>("wheel_parameters.wheel_radius", 0.075);
+  wheel_params.separation_x =
+      this->declare_parameter<double>("wheel_parameters.wheel_separation_x", 0.30);
+  wheel_params.separation_y =
+      this->declare_parameter<double>("wheel_parameters.wheel_separation_y", 0.25);
+  
+      std::string can_dev =
       this->declare_parameter<std::string>("can_device", "can0");
 
   MotorParameters motor_params;
@@ -49,7 +54,7 @@ MotionControllerNode::MotionControllerNode(const rclcpp::NodeOptions& options)
       static_cast<uint8_t>(this->get_parameter("motors.FR_node_id").as_int()),
       static_cast<uint8_t>(this->get_parameter("motors.RL_node_id").as_int()),
       static_cast<uint8_t>(this->get_parameter("motors.RR_node_id").as_int())};
-  WheelParameters wheel_params{radius, sep_x, sep_y};
+  
   can_interface_ = std::make_shared<can_control::SocketCanInterface>(can_dev);
   motion_controller_ = std::make_shared<MotionController>(
       can_interface_, node_ids, motor_params, wheel_params);
