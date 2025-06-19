@@ -5,21 +5,21 @@
 namespace motion_control_mecanum {
 
 MotionController::MotionController(const WheelParameters& wheel_params)
-    : wheel_params_(wheel_params) {}
+    : wheel_params_(wheel_params), state_(MotionState::kIdle) {}
 
 MotionController::MotionController(
     std::shared_ptr<can_control::SocketCanInterface> can_interface,
     const std::array<uint8_t, 4>& node_ids, const MotorParameters& motor_params,
     const WheelParameters& wheel_params)
-    : wheel_params_(wheel_params), can_interface_(std::move(can_interface)) {
+    : wheel_params_(wheel_params), state_(MotionState::kIdle),
+      can_interface_(std::move(can_interface)) {
   for (size_t i = 0; i < motor_controllers_.size(); ++i) {
     motor_controllers_[i] = std::make_shared<MotorController>(
         can_interface_, node_ids[i], motor_params);
   }
 }
 
-std::array<double, 4> MotionController::compute(
-    const geometry_msgs::msg::Twist& cmd) {
+bool MotionController::compute(const geometry_msgs::msg::Twist& cmd) {
   const double Lx = wheel_params_.separation_x / 2.0;
   const double Ly = wheel_params_.separation_y / 2.0;
   const double k = Lx + Ly;
@@ -33,13 +33,16 @@ std::array<double, 4> MotionController::compute(
   speeds[2] = (vx + vy - k * wz) / wheel_params_.radius;  // rear left
   speeds[3] = (vx - vy + k * wz) / wheel_params_.radius;  // rear right
 
+  bool success = true;
   for (size_t i = 0; i < motor_controllers_.size(); ++i) {
     if (motor_controllers_[i]) {
-      motor_controllers_[i]->SetTargetVelocity(
-          static_cast<int32_t>(speeds[i]));
+      if (!motor_controllers_[i]->SetTargetVelocity(
+              static_cast<int32_t>(speeds[i]))) {
+        success = false;
+      }
     }
   }
-  return speeds;
+  return success;
 }
 
 
@@ -55,6 +58,9 @@ bool MotionController::servoOn() {
       }
     }
   }
+  if (success) {
+    state_ = MotionState::kRunning;
+  }
   return success;
 }
 
@@ -66,6 +72,9 @@ bool MotionController::servoOff() {
         success = false;
       }
     }
+  }
+  if (success) {
+    state_ = MotionState::kIdle;
   }
   return success;
 }
