@@ -30,23 +30,6 @@ class MockCanInterface : public CanInterface {
   }
 };
 
-TEST(MotorControllerCAN, WriteSpeeds) {
-  auto mock = std::make_shared<MockCanInterface>();
-  motion_control_mecanum::MotorController mc(mock, 1);
-  mock->sent_frames.clear();
-  std::array<double,4> speeds{1.0, -2.0, 0.5, 3.0};
-  EXPECT_TRUE(mc.writeSpeeds(speeds));
-  ASSERT_EQ(mock->sent_frames.size(), 4u);
-  for(size_t i=0;i<4;i++) {
-    const auto& f = mock->sent_frames[i];
-    EXPECT_EQ(f.arbitration_id, 0x200 + i);
-    EXPECT_EQ(f.dlc, 4u);
-    int32_t val = static_cast<int32_t>(speeds[i] * 1000.0);
-    EXPECT_EQ(f.data.size(), 4u);
-    int32_t packed = (f.data[0]<<24)|(f.data[1]<<16)|(f.data[2]<<8)|f.data[3];
-    EXPECT_EQ(packed, val);
-  }
-}
 
 TEST(MotorControllerCAN, SetModeOfOperation) {
   auto mock = std::make_shared<MockCanInterface>();

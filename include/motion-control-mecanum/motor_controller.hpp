@@ -38,7 +38,6 @@ class MotorController {
   MotorController(std::shared_ptr<can_control::CanInterface> can,
                   uint8_t node_id, const MotorParameters& params);
 
-  bool writeSpeeds(const std::array<double, 4>& speeds);
 
   bool readStatusword(uint16_t* out_status);
 
