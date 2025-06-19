@@ -90,7 +90,9 @@ void MotionControllerNode::cmdVelCallback(
       std::clamp(limited.angular.z, -control_params_.max_angular_velocity,
                  control_params_.max_angular_velocity);
 
-  (void)motion_controller_->compute(limited);
+  if (motion_controller_->getState() == MotionState::kRunning) {
+    (void)motion_controller_->compute(limited);
+  }
 }
 
 void MotionControllerNode::handleServoOn(
