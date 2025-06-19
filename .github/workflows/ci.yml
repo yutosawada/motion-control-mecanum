@@ -25,7 +25,15 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: ros2_ws/src/motion-control-mecanum
-
+          
+      - name: Cache APT packages
+        uses: actions/cache@v4             # ★ 前回削除したものを復活
+        with:
+          path: /var/cache/apt/archives    # DEB を保存して再利用
+          key:  apt-${{ runner.os }}-${{ matrix.ros_distro }}-${{ hashFiles('**/package.xml') }}
+          restore-keys: |
+            apt-${{ runner.os }}-${{ matrix.ros_distro }}-
+            
       # 2. ROS ツール類（rosdep, colcon など）
       - name: Setup ROS
         uses: ros-tooling/setup-ros@v0.7
