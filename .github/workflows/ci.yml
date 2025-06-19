@@ -2,56 +2,43 @@ name: ROS 2 CI (colcon)
 
 on:
   pull_request:
-    branches:
-      - main
-
-env:
-  ROS_DISTRO: humble        # 必要に応じて iron / jazzy 等へ
+    branches: [ main ]
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-22.04    # ← ここを固定
+    runs-on: ubuntu-22.04
+
+    strategy:
+      matrix:
+        ros_distro: [ humble ]   # 必要なら iron / jazzy など追加
 
     container:
-      image: ros:${{ env.ROS_DISTRO }}-ros-base-jammy   # 22.04
+      image: ros:${{ matrix.ros_distro }}-ros-base-jammy   # Ubuntu 22.04 + ROS2
+
+    env:
+      ROS_DISTRO: ${{ matrix.ros_distro }}
 
     steps:
-      - name: Checkout repo
+      # 1. ソース取得
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           path: ros2_ws/src/motion-control-mecanum
 
-      - name: Setup ROS tools + apt-cache
+      # 2. ROS ツール類（rosdep, colcon など）
+      - name: Setup ROS
         uses: ros-tooling/setup-ros@v0.7
         with:
           required-ros-distributions: ${{ env.ROS_DISTRO }}
 
-      - name: Cache APT packages
-        uses: actions/cache@v4
-        with:
-          path: /var/cache/apt
-          key:  apt-${{ runner.os }}-${{ env.ROS_DISTRO }}-${{ hashFiles('ros2_ws/src/**/*.xml') }}
-          restore-keys: |
-            apt-${{ runner.os }}-${{ env.ROS_DISTRO }}-
-
-      - name: Install dependencies via rosdep
+      # 3. 依存パッケージをインストール
+      - name: rosdep install
         shell: bash
         run: |
           rosdep update -y
-          rosdep install --from-paths ros2_ws --ignore-src -r -y \
-            --rosdistro $ROS_DISTRO
+          rosdep install --from-paths ros2_ws --ignore-src -r -y --rosdistro $ROS_DISTRO
 
-      - name: Cache colcon build output
-        uses: actions/cache@v4
-        with:
-          path: |
-            ros2_ws/build
-            ros2_ws/install
-            ros2_ws/log
-          key: colcon-${{ runner.os }}-${{ env.ROS_DISTRO }}-${{ hashFiles('ros2_ws/src/**/CMakeLists.txt', 'ros2_ws/src/**/package.xml') }}
-          restore-keys: |
-            colcon-${{ runner.os }}-${{ env.ROS_DISTRO }}-
-
+      # 4. ビルド
       - name: colcon build
         shell: bash
         working-directory: ros2_ws
@@ -59,6 +46,7 @@ jobs:
           source /opt/ros/$ROS_DISTRO/setup.bash
           colcon build --event-handlers console_direct+
 
+      # 5. テスト
       - name: colcon test
         shell: bash
         working-directory: ros2_ws
