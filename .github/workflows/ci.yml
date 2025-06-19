@@ -2,7 +2,8 @@ name: ROS 2 CI (colcon)
 
 on:
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
 
 env:
   ROS_DISTRO: humble        # 必要に応じて iron / jazzy 等へ
