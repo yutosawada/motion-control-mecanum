@@ -1,9 +1,9 @@
-name: ROS 2 CI (colcon)
+name: ROS 2 CI (colcon + coverage)
 
 on:
-  pull_request:           # PR イベント
-    branches: [ main ]
-  workflow_dispatch: {} 
+  pull_request:
+    branches: [main]
+  workflow_dispatch: {}
 
 jobs:
   build-and-test:
@@ -11,55 +11,93 @@ jobs:
 
     strategy:
       matrix:
-        ros_distro: [ humble ]   # 必要なら iron / jazzy など追加
+        ros_distro: [humble]      # iron / jazzy を追加する場合はここに列挙
 
     container:
-      image: ros:${{ matrix.ros_distro }}-ros-base-jammy   # Ubuntu 22.04 + ROS2
+      image: ros:${{ matrix.ros_distro }}-ros-base-jammy  # Ubuntu22.04 + ROS2
 
     env:
       ROS_DISTRO: ${{ matrix.ros_distro }}
 
     steps:
-      # 1. ソース取得
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          path: ros2_ws/src/motion-control-mecanum
-          
-      - name: Cache APT packages
-        uses: actions/cache@v4             # ★ 前回削除したものを復活
-        with:
-          path: /var/cache/apt/archives    # DEB を保存して再利用
-          key:  apt-${{ runner.os }}-${{ matrix.ros_distro }}-${{ hashFiles('**/package.xml') }}
-          restore-keys: |
-            apt-${{ runner.os }}-${{ matrix.ros_distro }}-
-            
-      # 2. ROS ツール類（rosdep, colcon など）
-      - name: Setup ROS
-        uses: ros-tooling/setup-ros@v0.7
-        with:
-          required-ros-distributions: ${{ env.ROS_DISTRO }}
+    # 1. ソース取得 ----------------------------------------------------------
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        path: ros2_ws/src/motion-control-mecanum
 
-      # 3. 依存パッケージをインストール
-      - name: rosdep install
-        shell: bash
-        run: |
-          rosdep update -y
-          rosdep install --from-paths ros2_ws --ignore-src -r -y --rosdistro $ROS_DISTRO
+    # 2. APT キャッシュ ------------------------------------------------------
+    - name: Cache APT packages
+      uses: actions/cache@v4
+      with:
+        path: /var/cache/apt/archives
+        key:  apt-${{ runner.os }}-${{ matrix.ros_distro }}-${{ hashFiles('**/package.xml') }}
+        restore-keys: |
+          apt-${{ runner.os }}-${{ matrix.ros_distro }}-
 
-      # 4. ビルド
-      - name: colcon build
-        shell: bash
-        working-directory: ros2_ws
-        run: |
-          source /opt/ros/$ROS_DISTRO/setup.bash
-          colcon build --event-handlers console_direct+
+    # 3. カバレッジ計測ツールを導入 ------------------------------------------
+    - name: Install coverage tooling (lcov + colcon plugin)
+      shell: bash
+      run: |
+        apt-get update
+        # lcov本体 + colconプラグイン / mixin
+        DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+          lcov python3-colcon-lcov-result python3-colcon-mixin
+        # mixin の定義を取得
+        colcon mixin add default https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
+        colcon mixin update
 
-      # 5. テスト
-      - name: colcon test
-        shell: bash
-        working-directory: ros2_ws
-        run: |
-          source install/setup.bash
-          colcon test --event-handlers console_direct+
-          colcon test-result --verbose
+    # 4. ROS ツールチェーン --------------------------------------------------
+    - name: Setup ROS
+      uses: ros-tooling/setup-ros@v0.7
+      with:
+        required-ros-distributions: ${{ env.ROS_DISTRO }}
+
+    # 5. 依存パッケージをインストール ----------------------------------------
+    - name: rosdep install
+      shell: bash
+      run: |
+        rosdep update -y
+        rosdep install --from-paths ros2_ws --ignore-src -r -y --rosdistro $ROS_DISTRO
+
+    # 6. ビルド（カバレッジフラグ付き）---------------------------------------
+    - name: colcon build (with coverage)
+      shell: bash
+      working-directory: ros2_ws
+      run: |
+        source /opt/ros/$ROS_DISTRO/setup.bash
+        # coverage-gcc mixin で C/C++ 用カバレッジフラグを自動付与
+        colcon build --event-handlers console_direct+ --mixin coverage-gcc
+
+    # 7. ゼロ・カバレッジのベースライン作成 ----------------------------------
+    - name: Initialise coverage counters
+      shell: bash
+      working-directory: ros2_ws
+      run: |
+        colcon lcov-result --initial
+
+    # 8. テスト実行 ----------------------------------------------------------
+    - name: colcon test
+      shell: bash
+      working-directory: ros2_ws
+      run: |
+        source install/setup.bash
+        colcon test --event-handlers console_direct+
+        colcon test-result --verbose
+
+    # 9. レポート生成 --------------------------------------------------------
+    - name: Generate lcov report
+      shell: bash
+      working-directory: ros2_ws
+      run: |
+        # aggregate -> lcov/ ディレクトリに HTML 出力
+        colcon lcov-result
+        ls -R lcov | head -n 20   # デバッグ用（省いても良い）
+
+    # 10. HTML をアーティファクトとして保存 ---------------------------------
+    - name: Upload coverage artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: lcov-report-${{ matrix.ros_distro }}
+        path: ros2_ws/lcov
+        retention-days: 30
