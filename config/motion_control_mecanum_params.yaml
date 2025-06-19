@@ -4,23 +4,19 @@
     can_device_name: "can0"
     
     motors:
-      - node_id: 1
-        position: "FL"  # Front-Left
-      - node_id: 2
-        position: "FR"  # Front-Right
-      - node_id: 3
-        position: "RL"  # Rear-Left
-      - node_id: 4
-        position: "RR"  # Rear-Right
-    
-      motor_parameters:
-        acceleration: 1000
-        deceleration: 1000
-        max_torque: 1000
-        end_velocity: 0
-        quick_stop_deceleration: 1000
-        velocity_window: 0
-        velocity_threshold: 0
+      FL_node_id: 1
+      FR_node_id: 2
+      RL_node_id: 3
+      RR_node_id: 4
+
+    motor_parameters:
+      acceleration: 1000
+      deceleration: 1000
+      max_torque: 1000
+      end_velocity: 0
+      quick_stop_deceleration: 1000
+      velocity_window: 0
+      velocity_threshold: 0
     
     wheel_parameters:
       wheel_radius: 0.075  # m
