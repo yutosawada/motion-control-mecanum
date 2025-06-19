@@ -36,6 +36,10 @@ class MotionController {
 
   MotionState getState() const { return state_; }
 
+  bool getMotorTorques(std::array<int16_t, 4>* out_torques) const;
+
+  bool getMotorVelocities(std::array<int32_t, 4>* out_velocities) const;
+
  private:
   WheelParameters wheel_params_{};
 
