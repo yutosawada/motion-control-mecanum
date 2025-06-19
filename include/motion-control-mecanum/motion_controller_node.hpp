@@ -6,6 +6,7 @@
 #include "geometry_msgs/msg/twist.hpp"
 #include "motion-control-mecanum/motion_controller.hpp"
 #include "motion-control-mecanum/motor_parameters.hpp"
+#include "can/socket_can_interface.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "std_srvs/srv/trigger.hpp"
 
@@ -30,6 +31,7 @@ class MotionControllerNode : public rclcpp::Node {
   rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub_;
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr servo_on_service_;
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr servo_off_service_;
+  std::shared_ptr<can_control::SocketCanInterface> can_interface_;
   std::shared_ptr<MotionController> motion_controller_;
 };
 
