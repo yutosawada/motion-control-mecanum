@@ -1,35 +1,67 @@
-name: CI
+name: ROS 2 CI (colcon)
 
 on:
   pull_request:
-    branches:
-      - main
+    branches: [ main ]
+
+env:
+  ROS_DISTRO: humble        # 必要に応じて iron / jazzy 等へ
 
 jobs:
-  build:
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v3
+  build-and-test:
+    runs-on: ubuntu-22.04    # ← ここを固定
 
-      - name: Set up ROS 2
+    container:
+      image: ros:${{ env.ROS_DISTRO }}-ros-base-jammy   # 22.04
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          path: ros2_ws/src/motion-control-mecanum
+
+      - name: Setup ROS tools + apt-cache
         uses: ros-tooling/setup-ros@v0.7
         with:
-          required-ros-distributions: humble
+          required-ros-distributions: ${{ env.ROS_DISTRO }}
 
-      - name: Initialize rosdep          # ← ここを追加
+      - name: Cache APT packages
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt
+          key:  apt-${{ runner.os }}-${{ env.ROS_DISTRO }}-${{ hashFiles('ros2_ws/src/**/*.xml') }}
+          restore-keys: |
+            apt-${{ runner.os }}-${{ env.ROS_DISTRO }}-
+
+      - name: Install dependencies via rosdep
+        shell: bash
         run: |
-          sudo rosdep init || true
-          rosdep update
+          rosdep update -y
+          rosdep install --from-paths ros2_ws --ignore-src -r -y \
+            --rosdistro $ROS_DISTRO
 
-      - name: Install dependencies
-        run: rosdep install -i --from-path . --rosdistro humble -y
+      - name: Cache colcon build output
+        uses: actions/cache@v4
+        with:
+          path: |
+            ros2_ws/build
+            ros2_ws/install
+            ros2_ws/log
+          key: colcon-${{ runner.os }}-${{ env.ROS_DISTRO }}-${{ hashFiles('ros2_ws/src/**/CMakeLists.txt', 'ros2_ws/src/**/package.xml') }}
+          restore-keys: |
+            colcon-${{ runner.os }}-${{ env.ROS_DISTRO }}-
 
       - name: colcon build
-        run: colcon build --event-handlers console_direct+
+        shell: bash
+        working-directory: ros2_ws
+        run: |
+          source /opt/ros/$ROS_DISTRO/setup.bash
+          colcon build --event-handlers console_direct+
 
       - name: colcon test
-        if: success()
+        shell: bash
+        working-directory: ros2_ws
         run: |
+          source install/setup.bash
           colcon test --event-handlers console_direct+
-          colcon test-result --all --verbose
-
+          colcon test-result --verbose
