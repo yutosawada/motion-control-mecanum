@@ -1,6 +1,7 @@
 #include "motion-control-mecanum/motion_controller_node.hpp"
 
 #include "std_srvs/srv/trigger.hpp"
+#include "motion-control-mecanum/motor_parameters.hpp"
 
 namespace motion_control_mecanum {
 
@@ -17,9 +18,32 @@ MotionControllerNode::MotionControllerNode(const rclcpp::NodeOptions& options)
   std::string can_dev =
       this->declare_parameter<std::string>("can_device", "can0");
 
+  MotorParameters motor_params;
+  motor_params.max_speed =
+      this->declare_parameter<int>("motor_parameters.max_speed", 3000);
+  motor_params.acceleration =
+      this->declare_parameter<int>("motor_parameters.acceleration", 1000);
+  motor_params.deceleration =
+      this->declare_parameter<int>("motor_parameters.deceleration", 1000);
+  motor_params.gear_ratio =
+      this->declare_parameter<double>("motor_parameters.gear_ratio", 10.0);
+  motor_params.encoder_resolution =
+      this->declare_parameter<int>("motor_parameters.encoder_resolution", 4096);
+  motor_params.max_torque =
+      this->declare_parameter<int>("motor_parameters.max_torque", 1000);
+  motor_params.end_velocity =
+      this->declare_parameter<int>("motor_parameters.end_velocity", 0);
+  motor_params.quick_stop_deceleration =
+      this->declare_parameter<int>("motor_parameters.quick_stop_deceleration",
+                                   1000);
+  motor_params.velocity_window =
+      this->declare_parameter<int>("motor_parameters.velocity_window", 0);
+  motor_params.velocity_threshold =
+      this->declare_parameter<int>("motor_parameters.velocity_threshold", 0);
+
   std::array<uint8_t, 4> node_ids{1, 2, 3, 4};
-  motion_controller_ = std::make_shared<MotionController>(can_dev, node_ids,
-                                                          radius, sep_x, sep_y);
+  motion_controller_ = std::make_shared<MotionController>(
+      can_dev, node_ids, motor_params, radius, sep_x, sep_y);
 
   cmd_vel_sub_ = create_subscription<geometry_msgs::msg::Twist>(
       "cmd_vel", rclcpp::QoS(10),
