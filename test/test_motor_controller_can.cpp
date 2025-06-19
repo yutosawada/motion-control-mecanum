@@ -33,6 +33,7 @@ class MockCanInterface : public CanInterface {
 TEST(MotorControllerCAN, WriteSpeeds) {
   auto mock = std::make_shared<MockCanInterface>();
   motion_control_mecanum::MotorController mc(mock, 1);
+  mock->sent_frames.clear();
   std::array<double,4> speeds{1.0, -2.0, 0.5, 3.0};
   EXPECT_TRUE(mc.writeSpeeds(speeds));
   ASSERT_EQ(mock->sent_frames.size(), 4u);
@@ -49,6 +50,10 @@ TEST(MotorControllerCAN, WriteSpeeds) {
 
 TEST(MotorControllerCAN, SetModeOfOperation) {
   auto mock = std::make_shared<MockCanInterface>();
+
+  motion_control_mecanum::MotorParameters params{};
+  motion_control_mecanum::MotorController mc(mock, 1, params);
+  mock->sent_frames.clear();
   CanFrame resp;
   resp.arbitration_id = motor_controller::kSdoResponseBaseId + 1;
   resp.dlc = 8;
@@ -56,8 +61,6 @@ TEST(MotorControllerCAN, SetModeOfOperation) {
                                    0,0,0,0,0,0,0};
   mock->recv_frames.push_back(resp);
 
-  motion_control_mecanum::MotorParameters params{};
-  motion_control_mecanum::MotorController mc(mock, 1, params);
   EXPECT_TRUE(mc.SetModeOfOperation(motion_control_mecanum::OperationMode::kProfileVelocity));
   ASSERT_EQ(mock->sent_frames.size(), 1u);
   const auto& f = mock->sent_frames[0];
