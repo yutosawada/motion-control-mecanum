@@ -5,26 +5,24 @@
 #include <memory>
 #include <string>
 
+#include "can/socket_can_interface.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 #include "motion-control-mecanum/motor_controller.hpp"
-#include "can/socket_can_interface.hpp"
 
 namespace motion_control_mecanum {
 
 class MotionController {
  public:
-  MotionController(double wheel_radius, double wheel_separation_x, double wheel_separation_y);
+  MotionController(double wheel_radius, double wheel_separation_x,
+                   double wheel_separation_y);
 
-  MotionController(
-    const std::string & can_device,
-    const std::array<uint8_t, 4> & node_ids,
-    double wheel_radius,
-    double wheel_separation_x,
-    double wheel_separation_y);
+  MotionController(const std::string& can_device,
+                   const std::array<uint8_t, 4>& node_ids, double wheel_radius,
+                   double wheel_separation_x, double wheel_separation_y);
 
-  std::array<double, 4> compute(const geometry_msgs::msg::Twist & cmd) const;
+  std::array<double, 4> compute(const geometry_msgs::msg::Twist& cmd) const;
 
-  bool writeSpeeds(const std::array<double, 4> & speeds);
+  bool writeSpeeds(const std::array<double, 4>& speeds);
 
   bool servoOn();
 

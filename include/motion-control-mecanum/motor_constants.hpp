@@ -1,14 +1,14 @@
 #ifndef ORIENTAL_MOTOR_CONSTANTS_HPP_
 #define ORIENTAL_MOTOR_CONSTANTS_HPP_
 
-#include "motion-control-mecanum/motor_controller.hpp"
-#include "rclcpp/rclcpp.hpp"
-#include "can/can_interface.hpp"
-#include "can/socket_can_interface.hpp"
 #include <string>  // std::string 利用のため
 
-namespace motor_controller
-{
+#include "can/can_interface.hpp"
+#include "can/socket_can_interface.hpp"
+#include "motion-control-mecanum/motor_controller.hpp"
+#include "rclcpp/rclcpp.hpp"
+
+namespace motor_controller {
 
 constexpr uint32_t kSdoRequestBaseId = 0x600;
 constexpr uint32_t kSdoResponseBaseId = 0x580;
@@ -39,6 +39,6 @@ constexpr uint16_t kStartHomingOperationValue = 0x001F;
 constexpr uint16_t kPostionNewSetPoint = 0x005F;
 constexpr uint16_t kPostionChangeSetImmediately = 0x002F;
 
-}
+}  // namespace motor_controller
 
 #endif  // ORIENTAL_MOTOR_CONTROLLER_HPP_

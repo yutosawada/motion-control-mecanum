@@ -2,11 +2,12 @@
 #define MOTION_CONTROL_MECANUM__MOTOR_CONTROLLER_HPP_
 
 #include <array>
+#include <cstdint>
 #include <memory>
 #include <vector>
-#include <cstdint>
-#include "rclcpp/rclcpp.hpp"
+
 #include "can/can_interface.hpp"
+#include "rclcpp/rclcpp.hpp"
 
 namespace motion_control_mecanum {
 
@@ -31,17 +32,18 @@ enum class QuickStopOptionCode : int16_t {
 
 class MotorController {
  public:
-  MotorController(std::shared_ptr<can_control::CanInterface> can, uint8_t node_id);
+  MotorController(std::shared_ptr<can_control::CanInterface> can,
+                  uint8_t node_id);
 
-  bool writeSpeeds(const std::array<double, 4> & speeds);
+  bool writeSpeeds(const std::array<double, 4>& speeds);
 
-  bool readStatusword(uint16_t * out_status);
+  bool readStatusword(uint16_t* out_status);
 
   // Get the actual torque value (object 0x6077).
-  bool GetTorqueActualValue(int16_t * out_torque);
+  bool GetTorqueActualValue(int16_t* out_torque);
 
   // Get the actual velocity value (object 0x606C).
-  bool GetVelocityActualValue(int32_t * out_velocity);
+  bool GetVelocityActualValue(int32_t* out_velocity);
 
   bool FaultReset();
   bool Shutdown();
@@ -85,9 +87,8 @@ class MotorController {
 
  private:
   bool SendControlWord(uint16_t control_value);
-  bool SdoTransaction(const std::vector<uint8_t> & request,
-    uint8_t expected_cmd,
-    std::vector<uint8_t> & response);
+  bool SdoTransaction(const std::vector<uint8_t>& request, uint8_t expected_cmd,
+                      std::vector<uint8_t>& response);
 
   std::shared_ptr<can_control::CanInterface> can_;
   uint8_t node_id_;
