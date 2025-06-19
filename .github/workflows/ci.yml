@@ -10,16 +10,26 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
+
       - name: Set up ROS 2
         uses: ros-tooling/setup-ros@v0.7
         with:
           required-ros-distributions: humble
+
+      - name: Initialize rosdep          # ← ここを追加
+        run: |
+          sudo rosdep init || true
+          rosdep update
+
       - name: Install dependencies
         run: rosdep install -i --from-path . --rosdistro humble -y
+
       - name: colcon build
         run: colcon build --event-handlers console_direct+
+
       - name: colcon test
         if: success()
         run: |
           colcon test --event-handlers console_direct+
           colcon test-result --all --verbose
+
