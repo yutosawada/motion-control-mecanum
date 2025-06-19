@@ -11,22 +11,19 @@ MotorController::MotorController(std::shared_ptr<can_control::CanInterface> can,
       motor_params_{},
       logger_(rclcpp::get_logger("MotorController")) {
   if (!ConfigureMotorParameters()) {
-    RCLCPP_ERROR(logger_,
-                 "Failed to configure motor parameters for node %u",
+    RCLCPP_ERROR(logger_, "Failed to configure motor parameters for node %u",
                  static_cast<unsigned>(node_id_));
   }
 }
 
 MotorController::MotorController(std::shared_ptr<can_control::CanInterface> can,
-                                 uint8_t node_id,
-                                 const MotorParameters& params)
+                                 uint8_t node_id, const MotorParameters& params)
     : can_(std::move(can)),
       node_id_(node_id),
       motor_params_(params),
       logger_(rclcpp::get_logger("MotorController")) {
   if (!ConfigureMotorParameters()) {
-    RCLCPP_ERROR(logger_,
-                 "Failed to configure motor parameters for node %u",
+    RCLCPP_ERROR(logger_, "Failed to configure motor parameters for node %u",
                  static_cast<unsigned>(node_id_));
   }
 }
@@ -36,23 +33,22 @@ bool MotorController::ConfigureMotorParameters() {
   success &= Shutdown();
   success &= SetModeOfOperation(OperationMode::kProfileVelocity);
   success &= SetTargetVelocity(0);
-  success &=
-      SetVelocityThreshold(static_cast<uint16_t>(motor_params_.velocity_threshold));
+  success &= SetVelocityThreshold(
+      static_cast<uint16_t>(motor_params_.velocity_threshold));
   success &=
       SetVelocityWindow(static_cast<uint16_t>(motor_params_.velocity_window));
-  success &= SetQuickStopOptionCode(
-      QuickStopOptionCode::kQuickStopRampStayQuickStop);
+  success &=
+      SetQuickStopOptionCode(QuickStopOptionCode::kQuickStopRampStayQuickStop);
   success &= SetQuickStopDeceleration(
       static_cast<uint32_t>(motor_params_.quick_stop_deceleration));
-  success &= SetProfileAcceleration(
-      static_cast<uint32_t>(motor_params_.acceleration));
-  success &= SetProfileDeceleration(
-      static_cast<uint32_t>(motor_params_.deceleration));
+  success &=
+      SetProfileAcceleration(static_cast<uint32_t>(motor_params_.acceleration));
+  success &=
+      SetProfileDeceleration(static_cast<uint32_t>(motor_params_.deceleration));
   success &= SetEndVelocity(motor_params_.end_velocity);
   success &= SetMaxTorque(static_cast<uint16_t>(motor_params_.max_torque));
   return success;
 }
-
 
 bool MotorController::SdoTransaction(const std::vector<uint8_t>& request,
                                      uint8_t expected_cmd,
