@@ -15,8 +15,8 @@
       max_torque: 1000
       end_velocity: 0
       quick_stop_deceleration: 1000
-      velocity_window: 0
-      velocity_threshold: 0
+      velocity_window: 15
+      velocity_threshold: 15
     
     wheel_parameters:
       wheel_radius: 0.075  # m
