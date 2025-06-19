@@ -10,9 +10,9 @@ MotorController::MotorController(std::shared_ptr<can_control::CanInterface> can,
       node_id_(node_id),
       motor_params_{},
       logger_(rclcpp::get_logger("MotorController")) {
-  if (!SetModeOfOperation(OperationMode::kProfileVelocity)) {
+  if (!ConfigureMotorParameters()) {
     RCLCPP_ERROR(logger_,
-                 "Failed to set operation mode to Profile Velocity for node %u",
+                 "Failed to configure motor parameters for node %u",
                  static_cast<unsigned>(node_id_));
   }
 }
@@ -24,11 +24,32 @@ MotorController::MotorController(std::shared_ptr<can_control::CanInterface> can,
       node_id_(node_id),
       motor_params_(params),
       logger_(rclcpp::get_logger("MotorController")) {
-  if (!SetModeOfOperation(OperationMode::kProfileVelocity)) {
+  if (!ConfigureMotorParameters()) {
     RCLCPP_ERROR(logger_,
-                 "Failed to set operation mode to Profile Velocity for node %u",
+                 "Failed to configure motor parameters for node %u",
                  static_cast<unsigned>(node_id_));
   }
+}
+
+bool MotorController::ConfigureMotorParameters() {
+  bool success = true;
+  success &= SetModeOfOperation(OperationMode::kProfileVelocity);
+  success &= SetTargetVelocity(0);
+  success &=
+      SetVelocityThreshold(static_cast<uint16_t>(motor_params_.velocity_threshold));
+  success &=
+      SetVelocityWindow(static_cast<uint16_t>(motor_params_.velocity_window));
+  success &= SetQuickStopOptionCode(
+      QuickStopOptionCode::kQuickStopRampStayQuickStop);
+  success &= SetQuickStopDeceleration(
+      static_cast<uint32_t>(motor_params_.quick_stop_deceleration));
+  success &= SetProfileAcceleration(
+      static_cast<uint32_t>(motor_params_.acceleration));
+  success &= SetProfileDeceleration(
+      static_cast<uint32_t>(motor_params_.deceleration));
+  success &= SetEndVelocity(motor_params_.end_velocity);
+  success &= SetMaxTorque(static_cast<uint16_t>(motor_params_.max_torque));
+  return success;
 }
 
 bool MotorController::writeSpeeds(const std::array<double, 4>& speeds) {
