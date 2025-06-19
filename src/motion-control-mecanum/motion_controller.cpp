@@ -11,7 +11,8 @@ MotionController::MotionController(
     std::shared_ptr<can_control::SocketCanInterface> can_interface,
     const std::array<uint8_t, 4>& node_ids, const MotorParameters& motor_params,
     const WheelParameters& wheel_params)
-    : wheel_params_(wheel_params), state_(MotionState::kIdle),
+    : wheel_params_(wheel_params),
+      state_(MotionState::kIdle),
       can_interface_(std::move(can_interface)) {
   for (size_t i = 0; i < motor_controllers_.size(); ++i) {
     motor_controllers_[i] = std::make_shared<MotorController>(
@@ -44,7 +45,6 @@ bool MotionController::compute(const geometry_msgs::msg::Twist& cmd) {
   }
   return success;
 }
-
 
 bool MotionController::servoOn() {
   bool success = true;

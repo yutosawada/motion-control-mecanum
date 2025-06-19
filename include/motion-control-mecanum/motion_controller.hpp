@@ -23,13 +23,12 @@ class MotionController {
  public:
   explicit MotionController(const WheelParameters& wheel_params);
 
-  MotionController(std::shared_ptr<can_control::SocketCanInterface> can_interface,
-                   const std::array<uint8_t, 4>& node_ids,
-                   const MotorParameters& motor_params,
-                   const WheelParameters& wheel_params);
+  MotionController(
+      std::shared_ptr<can_control::SocketCanInterface> can_interface,
+      const std::array<uint8_t, 4>& node_ids,
+      const MotorParameters& motor_params, const WheelParameters& wheel_params);
 
   bool compute(const geometry_msgs::msg::Twist& cmd);
-
 
   bool servoOn();
 
