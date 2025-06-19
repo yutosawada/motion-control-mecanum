@@ -33,6 +33,7 @@ MotorController::MotorController(std::shared_ptr<can_control::CanInterface> can,
 
 bool MotorController::ConfigureMotorParameters() {
   bool success = true;
+  success &= Shutdown();
   success &= SetModeOfOperation(OperationMode::kProfileVelocity);
   success &= SetTargetVelocity(0);
   success &=
