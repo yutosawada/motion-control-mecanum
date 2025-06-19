@@ -38,8 +38,9 @@ MotionControllerNode::MotionControllerNode(const rclcpp::NodeOptions& options)
 
   std::array<uint8_t, 4> node_ids{1, 2, 3, 4};
   WheelParameters wheel_params{radius, sep_x, sep_y};
+  can_interface_ = std::make_shared<can_control::SocketCanInterface>(can_dev);
   motion_controller_ = std::make_shared<MotionController>(
-      can_dev, node_ids, motor_params, wheel_params);
+      can_interface_, node_ids, motor_params, wheel_params);
 
   cmd_vel_sub_ = create_subscription<geometry_msgs::msg::Twist>(
       "cmd_vel", rclcpp::QoS(10),
