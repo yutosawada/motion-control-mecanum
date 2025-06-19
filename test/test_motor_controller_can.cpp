@@ -1,7 +1,9 @@
 #include <gtest/gtest.h>
 #include "motion-control-mecanum/motor_controller.hpp"
 #include "motion-control-mecanum/motor_parameters.hpp"
+#include "motion-control-mecanum/motor_constants.hpp"
 #include "can/can_interface.hpp"
+#include <vector>
 
 using can_control::CanFrame;
 using can_control::CanInterface;
@@ -50,7 +52,8 @@ TEST(MotorControllerCAN, SetModeOfOperation) {
   CanFrame resp;
   resp.arbitration_id = motor_controller::kSdoResponseBaseId + 1;
   resp.dlc = 8;
-  resp.data = {motor_controller::kSdoExpectedResponseDownload,0,0,0,0,0,0,0};
+  resp.data = std::vector<uint8_t>{motor_controller::kSdoExpectedResponseDownload,
+                                   0,0,0,0,0,0,0};
   mock->recv_frames.push_back(resp);
 
   motion_control_mecanum::MotorParameters params{};
