@@ -1,9 +1,9 @@
-#include "motion-control-mecanum/motion_controller.hpp"
 #include <gtest/gtest.h>
-#include "geometry_msgs/msg/twist.hpp"
 
-TEST(MotionControllerTest, StraightX)
-{
+#include "geometry_msgs/msg/twist.hpp"
+#include "motion-control-mecanum/motion_controller.hpp"
+
+TEST(MotionControllerTest, StraightX) {
   motion_control_mecanum::MotionController mc(0.1, 0.2, 0.2);
   geometry_msgs::msg::Twist cmd;
   cmd.linear.x = 1.0;
@@ -13,8 +13,7 @@ TEST(MotionControllerTest, StraightX)
   }
 }
 
-TEST(MotionControllerTest, StraightY)
-{
+TEST(MotionControllerTest, StraightY) {
   motion_control_mecanum::MotionController mc(0.1, 0.2, 0.2);
   geometry_msgs::msg::Twist cmd;
   cmd.linear.y = 1.0;
