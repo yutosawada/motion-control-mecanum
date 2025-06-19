@@ -8,7 +8,13 @@ MotorController::MotorController(std::shared_ptr<can_control::CanInterface> can,
                                  uint8_t node_id)
     : can_(std::move(can)),
       node_id_(node_id),
-      logger_(rclcpp::get_logger("MotorController")) {}
+      logger_(rclcpp::get_logger("MotorController")) {
+  if (!SetModeOfOperation(OperationMode::kProfileVelocity)) {
+    RCLCPP_ERROR(logger_,
+                 "Failed to set operation mode to Profile Velocity for node %u",
+                 static_cast<unsigned>(node_id_));
+  }
+}
 
 bool MotorController::writeSpeeds(const std::array<double, 4>& speeds) {
   for (size_t i = 0; i < speeds.size(); ++i) {
