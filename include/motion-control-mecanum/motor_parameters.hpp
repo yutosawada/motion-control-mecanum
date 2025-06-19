@@ -6,11 +6,8 @@
 namespace motion_control_mecanum {
 
 struct MotorParameters {
-  int32_t max_speed{0};
   int32_t acceleration{0};
   int32_t deceleration{0};
-  double gear_ratio{0.0};
-  int32_t encoder_resolution{0};
   int32_t max_torque{0};
   int32_t end_velocity{0};
   int32_t quick_stop_deceleration{0};
