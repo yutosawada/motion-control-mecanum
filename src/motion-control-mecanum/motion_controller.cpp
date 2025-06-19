@@ -79,4 +79,44 @@ bool MotionController::servoOff() {
   return success;
 }
 
+bool MotionController::getMotorTorques(
+    std::array<int16_t, 4>* out_torques) const {
+  bool success = true;
+  if (!out_torques) {
+    return false;
+  }
+
+  for (size_t i = 0; i < motor_controllers_.size(); ++i) {
+    int16_t torque = 0;
+    if (motor_controllers_[i] &&
+        motor_controllers_[i]->GetTorqueActualValue(&torque)) {
+      (*out_torques)[i] = torque;
+    } else {
+      success = false;
+      (*out_torques)[i] = 0;
+    }
+  }
+  return success;
+}
+
+bool MotionController::getMotorVelocities(
+    std::array<int32_t, 4>* out_velocities) const {
+  bool success = true;
+  if (!out_velocities) {
+    return false;
+  }
+
+  for (size_t i = 0; i < motor_controllers_.size(); ++i) {
+    int32_t vel = 0;
+    if (motor_controllers_[i] &&
+        motor_controllers_[i]->GetVelocityActualValue(&vel)) {
+      (*out_velocities)[i] = vel;
+    } else {
+      success = false;
+      (*out_velocities)[i] = 0;
+    }
+  }
+  return success;
+}
+
 }  // namespace motion_control_mecanum

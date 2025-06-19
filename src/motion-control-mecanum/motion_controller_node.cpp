@@ -1,10 +1,12 @@
 #include "motion-control-mecanum/motion_controller_node.hpp"
 
 #include <algorithm>
+#include <chrono>
 
 #include "motion-control-mecanum/motor_parameters.hpp"
 #include "motion-control-mecanum/wheel_parameters.hpp"
 #include "std_srvs/srv/trigger.hpp"
+#include "sensor_msgs/msg/joint_state.hpp"
 
 namespace motion_control_mecanum {
 
@@ -83,6 +85,13 @@ MotionControllerNode::MotionControllerNode(const rclcpp::NodeOptions& options)
   servo_off_service_ = create_service<std_srvs::srv::Trigger>(
       "servo_off", std::bind(&MotionControllerNode::handleServoOff, this,
                              std::placeholders::_1, std::placeholders::_2));
+
+  motor_state_pub_ =
+      create_publisher<sensor_msgs::msg::JointState>("motor_states", 10);
+
+  publish_timer_ = create_wall_timer(
+      std::chrono::duration<double>(1.0 / control_params_.control_frequency),
+      std::bind(&MotionControllerNode::publishMotorState, this));
 }
 
 void MotionControllerNode::cmdVelCallback(
@@ -119,6 +128,26 @@ void MotionControllerNode::handleServoOff(
   bool success = motion_controller_->servoOff();
   response->success = success;
   response->message = success ? "servo off" : "servo off failed";
+}
+
+void MotionControllerNode::publishMotorState() {
+  sensor_msgs::msg::JointState msg;
+  msg.header.stamp = now();
+  msg.name = {"FL", "FR", "RL", "RR"};
+  msg.velocity.resize(4);
+  msg.effort.resize(4);
+
+  std::array<int16_t, 4> torques{};
+  std::array<int32_t, 4> velocities{};
+  (void)motion_controller_->getMotorTorques(&torques);
+  (void)motion_controller_->getMotorVelocities(&velocities);
+
+  for (size_t i = 0; i < 4; ++i) {
+    msg.velocity[i] = static_cast<double>(velocities[i]);
+    msg.effort[i] = static_cast<double>(torques[i]);
+  }
+
+  motor_state_pub_->publish(msg);
 }
 
 }  // namespace motion_control_mecanum
