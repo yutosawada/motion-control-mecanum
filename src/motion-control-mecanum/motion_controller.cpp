@@ -35,12 +35,6 @@ std::array<double, 4> MotionController::compute(
   return speeds;
 }
 
-bool MotionController::writeSpeeds(const std::array<double, 4>& speeds) {
-  if (!motor_controllers_.empty() && motor_controllers_[0]) {
-    return motor_controllers_[0]->writeSpeeds(speeds);
-  }
-  return false;
-}
 
 bool MotionController::servoOn() {
   bool success = true;

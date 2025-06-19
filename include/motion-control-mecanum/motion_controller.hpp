@@ -24,7 +24,6 @@ class MotionController {
 
   std::array<double, 4> compute(const geometry_msgs::msg::Twist& cmd) const;
 
-  bool writeSpeeds(const std::array<double, 4>& speeds);
 
   bool servoOn();
 

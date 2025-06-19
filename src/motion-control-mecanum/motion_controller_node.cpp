@@ -58,8 +58,7 @@ MotionControllerNode::MotionControllerNode(const rclcpp::NodeOptions& options)
 
 void MotionControllerNode::cmdVelCallback(
     const geometry_msgs::msg::Twist::SharedPtr msg) {
-  auto speeds = motion_controller_->compute(*msg);
-  motion_controller_->writeSpeeds(speeds);
+  (void)motion_controller_->compute(*msg);
 }
 
 void MotionControllerNode::handleServoOn(
