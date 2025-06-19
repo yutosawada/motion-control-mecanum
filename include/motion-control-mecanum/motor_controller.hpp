@@ -8,6 +8,7 @@
 
 #include "can/can_interface.hpp"
 #include "rclcpp/rclcpp.hpp"
+#include "motion-control-mecanum/motor_parameters.hpp"
 
 namespace motion_control_mecanum {
 
@@ -34,6 +35,8 @@ class MotorController {
  public:
   MotorController(std::shared_ptr<can_control::CanInterface> can,
                   uint8_t node_id);
+  MotorController(std::shared_ptr<can_control::CanInterface> can,
+                  uint8_t node_id, const MotorParameters& params);
 
   bool writeSpeeds(const std::array<double, 4>& speeds);
 
@@ -92,6 +95,7 @@ class MotorController {
 
   std::shared_ptr<can_control::CanInterface> can_;
   uint8_t node_id_;
+  MotorParameters motor_params_{};
   rclcpp::Logger logger_;
 };
 

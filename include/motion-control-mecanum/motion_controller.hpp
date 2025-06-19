@@ -8,6 +8,7 @@
 #include "can/socket_can_interface.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 #include "motion-control-mecanum/motor_controller.hpp"
+#include "motion-control-mecanum/motor_parameters.hpp"
 
 namespace motion_control_mecanum {
 
@@ -17,7 +18,8 @@ class MotionController {
                    double wheel_separation_y);
 
   MotionController(const std::string& can_device,
-                   const std::array<uint8_t, 4>& node_ids, double wheel_radius,
+                   const std::array<uint8_t, 4>& node_ids,
+                   const MotorParameters& motor_params, double wheel_radius,
                    double wheel_separation_x, double wheel_separation_y);
 
   std::array<double, 4> compute(const geometry_msgs::msg::Twist& cmd) const;

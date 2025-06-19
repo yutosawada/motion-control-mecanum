@@ -8,6 +8,21 @@ MotorController::MotorController(std::shared_ptr<can_control::CanInterface> can,
                                  uint8_t node_id)
     : can_(std::move(can)),
       node_id_(node_id),
+      motor_params_{},
+      logger_(rclcpp::get_logger("MotorController")) {
+  if (!SetModeOfOperation(OperationMode::kProfileVelocity)) {
+    RCLCPP_ERROR(logger_,
+                 "Failed to set operation mode to Profile Velocity for node %u",
+                 static_cast<unsigned>(node_id_));
+  }
+}
+
+MotorController::MotorController(std::shared_ptr<can_control::CanInterface> can,
+                                 uint8_t node_id,
+                                 const MotorParameters& params)
+    : can_(std::move(can)),
+      node_id_(node_id),
+      motor_params_(params),
       logger_(rclcpp::get_logger("MotorController")) {
   if (!SetModeOfOperation(OperationMode::kProfileVelocity)) {
     RCLCPP_ERROR(logger_,

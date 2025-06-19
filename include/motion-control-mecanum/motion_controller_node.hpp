@@ -5,6 +5,7 @@
 
 #include "geometry_msgs/msg/twist.hpp"
 #include "motion-control-mecanum/motion_controller.hpp"
+#include "motion-control-mecanum/motor_parameters.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "std_srvs/srv/trigger.hpp"
 
