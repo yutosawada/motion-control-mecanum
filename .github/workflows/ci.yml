@@ -1,8 +1,9 @@
 name: ROS 2 CI (colcon)
 
 on:
-  pull_request:
+  pull_request:           # PR イベント
     branches: [ main ]
+  workflow_dispatch: {} 
 
 env:
   ROS_DISTRO: humble        # 必要に応じて iron / jazzy 等へ
