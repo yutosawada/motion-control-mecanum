@@ -1,9 +1,10 @@
 #include "motion-control-mecanum/motion_controller_node.hpp"
 
-#include "std_srvs/srv/trigger.hpp"
+#include <algorithm>
+
 #include "motion-control-mecanum/motor_parameters.hpp"
 #include "motion-control-mecanum/wheel_parameters.hpp"
-#include <algorithm>
+#include "std_srvs/srv/trigger.hpp"
 
 namespace motion_control_mecanum {
 
@@ -36,9 +37,8 @@ MotionControllerNode::MotionControllerNode(const rclcpp::NodeOptions& options)
       this->declare_parameter<int>("motor_parameters.max_torque", 1000);
   motor_params.end_velocity =
       this->declare_parameter<int>("motor_parameters.end_velocity", 0);
-  motor_params.quick_stop_deceleration =
-      this->declare_parameter<int>("motor_parameters.quick_stop_deceleration",
-                                   1000);
+  motor_params.quick_stop_deceleration = this->declare_parameter<int>(
+      "motor_parameters.quick_stop_deceleration", 1000);
   motor_params.velocity_window =
       this->declare_parameter<int>("motor_parameters.velocity_window", 0);
   motor_params.velocity_threshold =
@@ -57,11 +57,14 @@ MotionControllerNode::MotionControllerNode(const rclcpp::NodeOptions& options)
   control_params_.control_frequency =
       this->get_parameter("control_parameters.control_frequency").as_double();
   control_params_.max_linear_velocity_x =
-      this->get_parameter("control_parameters.max_linear_velocity_x").as_double();
+      this->get_parameter("control_parameters.max_linear_velocity_x")
+          .as_double();
   control_params_.max_linear_velocity_y =
-      this->get_parameter("control_parameters.max_linear_velocity_y").as_double();
+      this->get_parameter("control_parameters.max_linear_velocity_y")
+          .as_double();
   control_params_.max_angular_velocity =
-      this->get_parameter("control_parameters.max_angular_velocity").as_double();
+      this->get_parameter("control_parameters.max_angular_velocity")
+          .as_double();
 
   cmd_vel_sub_ = create_subscription<geometry_msgs::msg::Twist>(
       "cmd_vel", rclcpp::QoS(10),

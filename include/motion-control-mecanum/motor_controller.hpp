@@ -7,8 +7,8 @@
 #include <vector>
 
 #include "can/can_interface.hpp"
-#include "rclcpp/rclcpp.hpp"
 #include "motion-control-mecanum/motor_parameters.hpp"
+#include "rclcpp/rclcpp.hpp"
 
 namespace motion_control_mecanum {
 
@@ -37,7 +37,6 @@ class MotorController {
                   uint8_t node_id);
   MotorController(std::shared_ptr<can_control::CanInterface> can,
                   uint8_t node_id, const MotorParameters& params);
-
 
   bool readStatusword(uint16_t* out_status);
 
