@@ -14,11 +14,8 @@
         position: "RR"  # Rear-Right
     
       motor_parameters:
-        max_speed: 3000  # rpm
         acceleration: 1000
         deceleration: 1000
-        gear_ratio: 10.0
-        encoder_resolution: 4096
         max_torque: 1000
         end_velocity: 0
         quick_stop_deceleration: 1000

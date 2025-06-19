@@ -19,16 +19,10 @@ MotionControllerNode::MotionControllerNode(const rclcpp::NodeOptions& options)
       this->declare_parameter<std::string>("can_device", "can0");
 
   MotorParameters motor_params;
-  motor_params.max_speed =
-      this->declare_parameter<int>("motor_parameters.max_speed", 3000);
   motor_params.acceleration =
       this->declare_parameter<int>("motor_parameters.acceleration", 1000);
   motor_params.deceleration =
       this->declare_parameter<int>("motor_parameters.deceleration", 1000);
-  motor_params.gear_ratio =
-      this->declare_parameter<double>("motor_parameters.gear_ratio", 10.0);
-  motor_params.encoder_resolution =
-      this->declare_parameter<int>("motor_parameters.encoder_resolution", 4096);
   motor_params.max_torque =
       this->declare_parameter<int>("motor_parameters.max_torque", 1000);
   motor_params.end_velocity =
