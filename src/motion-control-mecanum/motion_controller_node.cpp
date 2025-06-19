@@ -8,7 +8,10 @@ namespace motion_control_mecanum {
 
 MotionControllerNode::MotionControllerNode(const rclcpp::NodeOptions& options)
     : rclcpp::Node("motion_controller_node", options) {
-  this->declare_parameter("motors", rclcpp::ParameterValue());
+  this->declare_parameter("motors.FL_node_id", 1);
+  this->declare_parameter("motors.FR_node_id", 2);
+  this->declare_parameter("motors.RL_node_id", 3);
+  this->declare_parameter("motors.RR_node_id", 4);
   this->declare_parameter("motor_parameters", rclcpp::ParameterValue());
   this->declare_parameter("wheel_parameters", rclcpp::ParameterValue());
   this->declare_parameter("control_parameters", rclcpp::ParameterValue());
@@ -36,7 +39,11 @@ MotionControllerNode::MotionControllerNode(const rclcpp::NodeOptions& options)
   motor_params.velocity_threshold =
       this->declare_parameter<int>("motor_parameters.velocity_threshold", 0);
 
-  std::array<uint8_t, 4> node_ids{1, 2, 3, 4};
+  std::array<uint8_t, 4> node_ids{
+      static_cast<uint8_t>(this->get_parameter("motors.FL_node_id").as_int()),
+      static_cast<uint8_t>(this->get_parameter("motors.FR_node_id").as_int()),
+      static_cast<uint8_t>(this->get_parameter("motors.RL_node_id").as_int()),
+      static_cast<uint8_t>(this->get_parameter("motors.RR_node_id").as_int())};
   WheelParameters wheel_params{radius, sep_x, sep_y};
   can_interface_ = std::make_shared<can_control::SocketCanInterface>(can_dev);
   motion_controller_ = std::make_shared<MotionController>(
