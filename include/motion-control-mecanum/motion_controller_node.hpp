@@ -19,6 +19,14 @@ class MotionControllerNode : public rclcpp::Node {
   explicit MotionControllerNode(
       const rclcpp::NodeOptions& options = rclcpp::NodeOptions());
 
+  MotionControllerNode(std::shared_ptr<MotionController> motion_controller,
+                       const rclcpp::NodeOptions& options =
+                           rclcpp::NodeOptions());
+
+  std::shared_ptr<MotionController> getMotionController() const {
+    return motion_controller_;
+  }
+
  private:
   void cmdVelCallback(const geometry_msgs::msg::Twist::SharedPtr msg);
 
