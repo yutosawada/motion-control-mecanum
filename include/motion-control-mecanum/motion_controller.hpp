@@ -9,18 +9,18 @@
 #include "geometry_msgs/msg/twist.hpp"
 #include "motion-control-mecanum/motor_controller.hpp"
 #include "motion-control-mecanum/motor_parameters.hpp"
+#include "motion-control-mecanum/wheel_parameters.hpp"
 
 namespace motion_control_mecanum {
 
 class MotionController {
  public:
-  MotionController(double wheel_radius, double wheel_separation_x,
-                   double wheel_separation_y);
+  explicit MotionController(const WheelParameters& wheel_params);
 
   MotionController(const std::string& can_device,
                    const std::array<uint8_t, 4>& node_ids,
-                   const MotorParameters& motor_params, double wheel_radius,
-                   double wheel_separation_x, double wheel_separation_y);
+                   const MotorParameters& motor_params,
+                   const WheelParameters& wheel_params);
 
   std::array<double, 4> compute(const geometry_msgs::msg::Twist& cmd) const;
 
@@ -31,9 +31,7 @@ class MotionController {
   bool servoOff();
 
  private:
-  double wheel_radius_;
-  double wheel_separation_x_;
-  double wheel_separation_y_;
+  WheelParameters wheel_params_{};
 
   std::shared_ptr<can_control::SocketCanInterface> can_interface_;
   std::array<std::shared_ptr<MotorController>, 4> motor_controllers_{};
