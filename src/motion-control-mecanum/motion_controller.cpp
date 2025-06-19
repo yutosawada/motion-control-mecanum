@@ -5,13 +5,14 @@
 namespace motion_control_mecanum {
 
 MotionController::MotionController(const WheelParameters& wheel_params)
-    : wheel_params_(wheel_params) {}
+    : wheel_params_(wheel_params), state_(MotionState::kIdle) {}
 
 MotionController::MotionController(
     std::shared_ptr<can_control::SocketCanInterface> can_interface,
     const std::array<uint8_t, 4>& node_ids, const MotorParameters& motor_params,
     const WheelParameters& wheel_params)
-    : wheel_params_(wheel_params), can_interface_(std::move(can_interface)) {
+    : wheel_params_(wheel_params), state_(MotionState::kIdle),
+      can_interface_(std::move(can_interface)) {
   for (size_t i = 0; i < motor_controllers_.size(); ++i) {
     motor_controllers_[i] = std::make_shared<MotorController>(
         can_interface_, node_ids[i], motor_params);
@@ -55,6 +56,9 @@ bool MotionController::servoOn() {
       }
     }
   }
+  if (success) {
+    state_ = MotionState::kRunning;
+  }
   return success;
 }
 
@@ -66,6 +70,9 @@ bool MotionController::servoOff() {
         success = false;
       }
     }
+  }
+  if (success) {
+    state_ = MotionState::kIdle;
   }
   return success;
 }

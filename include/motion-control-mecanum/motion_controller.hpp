@@ -13,6 +13,12 @@
 
 namespace motion_control_mecanum {
 
+enum class MotionState {
+  kIdle,
+  kRunning,
+  kError,
+};
+
 class MotionController {
  public:
   explicit MotionController(const WheelParameters& wheel_params);
@@ -29,8 +35,12 @@ class MotionController {
 
   bool servoOff();
 
+  MotionState getState() const { return state_; }
+
  private:
   WheelParameters wheel_params_{};
+
+  MotionState state_{MotionState::kIdle};
 
   std::shared_ptr<can_control::SocketCanInterface> can_interface_;
   std::array<std::shared_ptr<MotorController>, 4> motor_controllers_{};
