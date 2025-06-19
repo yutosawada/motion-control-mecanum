@@ -19,7 +19,7 @@ MotionController::MotionController(
 }
 
 std::array<double, 4> MotionController::compute(
-    const geometry_msgs::msg::Twist& cmd) const {
+    const geometry_msgs::msg::Twist& cmd) {
   const double Lx = wheel_params_.separation_x / 2.0;
   const double Ly = wheel_params_.separation_y / 2.0;
   const double k = Lx + Ly;
@@ -32,6 +32,13 @@ std::array<double, 4> MotionController::compute(
   speeds[1] = (vx + vy + k * wz) / wheel_params_.radius;  // front right
   speeds[2] = (vx + vy - k * wz) / wheel_params_.radius;  // rear left
   speeds[3] = (vx - vy + k * wz) / wheel_params_.radius;  // rear right
+
+  for (size_t i = 0; i < motor_controllers_.size(); ++i) {
+    if (motor_controllers_[i]) {
+      motor_controllers_[i]->SetTargetVelocity(
+          static_cast<int32_t>(speeds[i]));
+    }
+  }
   return speeds;
 }
 

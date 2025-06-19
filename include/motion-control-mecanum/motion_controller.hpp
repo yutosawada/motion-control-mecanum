@@ -22,7 +22,7 @@ class MotionController {
                    const MotorParameters& motor_params,
                    const WheelParameters& wheel_params);
 
-  std::array<double, 4> compute(const geometry_msgs::msg::Twist& cmd) const;
+  std::array<double, 4> compute(const geometry_msgs::msg::Twist& cmd);
 
 
   bool servoOn();
