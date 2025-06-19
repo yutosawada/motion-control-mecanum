@@ -89,6 +89,8 @@ class MotorController {
   bool SetMaxTorque(uint16_t max_torque);
 
  private:
+  // Configure motor parameters using stored MotorParameters
+  bool ConfigureMotorParameters();
   bool SendControlWord(uint16_t control_value);
   bool SdoTransaction(const std::vector<uint8_t>& request, uint8_t expected_cmd,
                       std::vector<uint8_t>& response);
