@@ -2,6 +2,7 @@
 
 #include "can/socket_can_interface.hpp"
 #include <cmath>
+#include "rclcpp/rclcpp.hpp"
 
 namespace motion_control_mecanum {
 
@@ -29,11 +30,15 @@ bool MotionController::compute(const geometry_msgs::msg::Twist& cmd) {
   const double vy = cmd.linear.y;
   const double wz = cmd.angular.z;
 
+  RCLCPP_DEBUG(logger_, "compute: vx=%.3f vy=%.3f wz=%.3f", vx, vy, wz);
+
   std::array<double, 4> speeds{};
   speeds[0] = (vx - vy - k * wz) / wheel_params_.radius;  // front left
   speeds[1] = (vx + vy + k * wz) / wheel_params_.radius;  // front right
   speeds[2] = (vx + vy - k * wz) / wheel_params_.radius;  // rear left
   speeds[3] = (vx - vy + k * wz) / wheel_params_.radius;  // rear right
+
+  RCLCPP_DEBUG(logger_, "target speeds: [%.3f, %.3f, %.3f, %.3f]", speeds[0], speeds[1], speeds[2], speeds[3]);
 
   bool success = true;
   for (size_t i = 0; i < motor_controllers_.size(); ++i) {
@@ -48,6 +53,7 @@ bool MotionController::compute(const geometry_msgs::msg::Twist& cmd) {
 }
 
 bool MotionController::servoOn() {
+  RCLCPP_DEBUG(logger_, "servoOn requested");
   bool success = true;
   for (auto& mc : motor_controllers_) {
     if (mc) {
@@ -61,11 +67,13 @@ bool MotionController::servoOn() {
   }
   if (success) {
     state_ = MotionState::kRunning;
+    RCLCPP_DEBUG(logger_, "servoOn successful");
   }
   return success;
 }
 
 bool MotionController::servoOff() {
+  RCLCPP_DEBUG(logger_, "servoOff requested");
   bool success = true;
   for (auto& mc : motor_controllers_) {
     if (mc) {
@@ -76,6 +84,7 @@ bool MotionController::servoOff() {
   }
   if (success) {
     state_ = MotionState::kIdle;
+    RCLCPP_DEBUG(logger_, "servoOff successful");
   }
   return success;
 }
@@ -150,6 +159,8 @@ bool MotionController::computeOdometry(double dt,
   pose_x_ += (vx * std::cos(pose_yaw_) - vy * std::sin(pose_yaw_)) * dt;
   pose_y_ += (vx * std::sin(pose_yaw_) + vy * std::cos(pose_yaw_)) * dt;
   pose_yaw_ += wz * dt;
+
+  RCLCPP_DEBUG(logger_, "odometry: x=%.3f y=%.3f yaw=%.3f", pose_x_, pose_y_, pose_yaw_);
 
   out_odom->pose.pose.position.x = pose_x_;
   out_odom->pose.pose.position.y = pose_y_;

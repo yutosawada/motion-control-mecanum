@@ -22,6 +22,7 @@ def generate_launch_description() -> LaunchDescription:
         name='motion_controller_node',
         output='screen',
         parameters=[params_file],
+        arguments=['--ros-args', '--log-level', 'debug'],
     )
 
     # Joy ドライバ

@@ -59,6 +59,8 @@ bool MotorController::SdoTransaction(const std::vector<uint8_t>& request,
   request_frame.dlc = motor_controller::kSdoDlc;
   request_frame.data = request;
 
+  RCLCPP_DEBUG(logger_, "SdoTransaction send: id=0x%X", request_frame.arbitration_id);
+
   if (!can_->Send(request_frame)) {
     RCLCPP_ERROR(logger_, "Failed to send SDO command.");
     return false;
@@ -84,6 +86,7 @@ bool MotorController::SdoTransaction(const std::vector<uint8_t>& request,
     return false;
   }
   response = response_frame.data;
+  RCLCPP_DEBUG(logger_, "SdoTransaction success for node %u", static_cast<unsigned>(node_id_));
   return true;
 }
 
@@ -478,6 +481,7 @@ bool MotorController::GetTorqueActualValue(int16_t* out_torque) {
   uint32_t raw = response_data[4] | (response_data[5] << 8) |
                  (response_data[6] << 16) | (response_data[7] << 24);
   *out_torque = static_cast<int16_t>(raw & 0xFFFF);
+  RCLCPP_DEBUG(logger_, "Torque value for node %u: %d", static_cast<unsigned>(node_id_), *out_torque);
   return true;
 }
 
@@ -510,6 +514,7 @@ bool MotorController::GetVelocityActualValue(int32_t* out_velocity) {
   uint32_t raw = response_data[4] | (response_data[5] << 8) |
                  (response_data[6] << 16) | (response_data[7] << 24);
   *out_velocity = static_cast<int32_t>(raw);
+  RCLCPP_DEBUG(logger_, "Velocity value for node %u: %d", static_cast<unsigned>(node_id_), *out_velocity);
   return true;
 }
 
