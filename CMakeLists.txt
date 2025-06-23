@@ -50,6 +50,12 @@ install(TARGETS motion_control_mecanum motion_controller_node
 install(DIRECTORY include/
   DESTINATION include)
 
+install(DIRECTORY launch/
+  DESTINATION share/${PROJECT_NAME}/)
+
+install(DIRECTORY config/
+  DESTINATION share/${PROJECT_NAME}/)
+
 if(BUILD_TESTING)
   ament_add_gtest(test_motion_controller test/test_motion_controller.cpp)
   if(TARGET test_motion_controller)
