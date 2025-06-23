@@ -1,6 +1,7 @@
 #include "motion-control-mecanum/motion_controller.hpp"
 
 #include "can/socket_can_interface.hpp"
+#include <cmath>
 
 namespace motion_control_mecanum {
 
@@ -117,6 +118,55 @@ bool MotionController::getMotorVelocities(
     }
   }
   return success;
+}
+
+bool MotionController::computeOdometry(double dt,
+                                       nav_msgs::msg::Odometry* out_odom) {
+  if (!out_odom) {
+    return false;
+  }
+
+  std::array<int32_t, 4> velocities{};
+  if (!getMotorVelocities(&velocities)) {
+    return false;
+  }
+
+  std::array<double, 4> w{};
+  for (size_t i = 0; i < w.size(); ++i) {
+    w[i] = static_cast<double>(velocities[i]);
+  }
+
+  const double Lx = wheel_params_.separation_x / 2.0;
+  const double Ly = wheel_params_.separation_y / 2.0;
+  const double k = Lx + Ly;
+
+  const double vx = wheel_params_.radius *
+                    (w[0] + w[1] + w[2] + w[3]) / 4.0;
+  const double vy = wheel_params_.radius *
+                    (-w[0] + w[1] + w[2] - w[3]) / 4.0;
+  const double wz = wheel_params_.radius *
+                    (-w[0] + w[1] - w[2] + w[3]) / (4.0 * k);
+
+  pose_x_ += (vx * std::cos(pose_yaw_) - vy * std::sin(pose_yaw_)) * dt;
+  pose_y_ += (vx * std::sin(pose_yaw_) + vy * std::cos(pose_yaw_)) * dt;
+  pose_yaw_ += wz * dt;
+
+  out_odom->pose.pose.position.x = pose_x_;
+  out_odom->pose.pose.position.y = pose_y_;
+  out_odom->pose.pose.position.z = 0.0;
+  out_odom->pose.pose.orientation.x = 0.0;
+  out_odom->pose.pose.orientation.y = 0.0;
+  out_odom->pose.pose.orientation.z = std::sin(pose_yaw_ / 2.0);
+  out_odom->pose.pose.orientation.w = std::cos(pose_yaw_ / 2.0);
+
+  out_odom->twist.twist.linear.x = vx;
+  out_odom->twist.twist.linear.y = vy;
+  out_odom->twist.twist.linear.z = 0.0;
+  out_odom->twist.twist.angular.x = 0.0;
+  out_odom->twist.twist.angular.y = 0.0;
+  out_odom->twist.twist.angular.z = wz;
+
+  return true;
 }
 
 }  // namespace motion_control_mecanum
