@@ -68,6 +68,17 @@ bool MotionController::servoOn() {
   if (success) {
     state_ = MotionState::kRunning;
     RCLCPP_DEBUG(logger_, "servoOn successful");
+    for (size_t i = 0; i < motor_controllers_.size(); ++i) {
+      auto& mc = motor_controllers_[i];
+      if (mc) {
+        uint16_t status = 0;
+        if (mc->readStatusword(&status)) {
+          RCLCPP_INFO(logger_, "Statusword[%zu]: 0x%04X", i, status);
+        } else {
+          RCLCPP_WARN(logger_, "Failed to read statusword for motor %zu", i);
+        }
+      }
+    }
   }
   return success;
 }
