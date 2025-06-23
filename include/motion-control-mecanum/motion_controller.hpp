@@ -11,6 +11,7 @@
 #include "motion-control-mecanum/motor_controller.hpp"
 #include "motion-control-mecanum/motor_parameters.hpp"
 #include "motion-control-mecanum/wheel_parameters.hpp"
+#include "rclcpp/rclcpp.hpp"
 
 namespace motion_control_mecanum {
 
@@ -54,6 +55,8 @@ class MotionController {
   double pose_x_{0.0};
   double pose_y_{0.0};
   double pose_yaw_{0.0};
+
+  rclcpp::Logger logger_{rclcpp::get_logger("MotionController")};
 };
 
 }  // namespace motion_control_mecanum
