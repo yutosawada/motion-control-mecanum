@@ -7,6 +7,7 @@
 #include "motion-control-mecanum/wheel_parameters.hpp"
 #include "std_srvs/srv/trigger.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
+#include "nav_msgs/msg/odometry.hpp"
 
 namespace motion_control_mecanum {
 namespace {
@@ -89,6 +90,9 @@ void initialize_node(MotionControllerNode * node,
 
   node->motor_state_pub_ =
       node->create_publisher<sensor_msgs::msg::JointState>("motor_states", 10);
+  node->odom_pub_ =
+      node->create_publisher<nav_msgs::msg::Odometry>("odom", 10);
+  node->last_odom_time_ = node->now();
 
   node->publish_timer_ = node->create_wall_timer(
       std::chrono::duration<double>(1.0 / node->control_params_.control_frequency),
@@ -146,8 +150,10 @@ void MotionControllerNode::handleServoOff(
 }
 
 void MotionControllerNode::publishMotorState() {
+  auto current_time = now();
+
   sensor_msgs::msg::JointState msg;
-  msg.header.stamp = now();
+  msg.header.stamp = current_time;
   msg.name = {"FL", "FR", "RL", "RR"};
   msg.velocity.resize(4);
   msg.effort.resize(4);
@@ -163,6 +169,16 @@ void MotionControllerNode::publishMotorState() {
   }
 
   motor_state_pub_->publish(msg);
+
+  nav_msgs::msg::Odometry odom;
+  double dt = (current_time - last_odom_time_).seconds();
+  last_odom_time_ = current_time;
+  if (motion_controller_->computeOdometry(dt, &odom)) {
+    odom.header.stamp = current_time;
+    odom.header.frame_id = "odom";
+    odom.child_frame_id = "base_link";
+    odom_pub_->publish(odom);
+  }
 }
 
 }  // namespace motion_control_mecanum

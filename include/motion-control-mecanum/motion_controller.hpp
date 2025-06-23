@@ -7,6 +7,7 @@
 
 #include "can/socket_can_interface.hpp"
 #include "geometry_msgs/msg/twist.hpp"
+#include "nav_msgs/msg/odometry.hpp"
 #include "motion-control-mecanum/motor_controller.hpp"
 #include "motion-control-mecanum/motor_parameters.hpp"
 #include "motion-control-mecanum/wheel_parameters.hpp"
@@ -40,6 +41,8 @@ class MotionController {
 
   bool getMotorVelocities(std::array<int32_t, 4>* out_velocities) const;
 
+  bool computeOdometry(double dt, nav_msgs::msg::Odometry* out_odom);
+
  private:
   WheelParameters wheel_params_{};
 
@@ -47,6 +50,10 @@ class MotionController {
 
   std::shared_ptr<can_control::SocketCanInterface> can_interface_;
   std::array<std::shared_ptr<MotorController>, 4> motor_controllers_{};
+
+  double pose_x_{0.0};
+  double pose_y_{0.0};
+  double pose_yaw_{0.0};
 };
 
 }  // namespace motion_control_mecanum
