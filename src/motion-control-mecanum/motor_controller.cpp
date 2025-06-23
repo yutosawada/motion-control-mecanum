@@ -215,7 +215,7 @@ bool MotorController::SetVelocityThreshold(uint16_t threshold) {
                  static_cast<unsigned>(node_id_));
     return false;
   }
-  RCLCPP_DEBUG(logger_, "SetVelocityThreshold(%u): %u",
+  RCLCPP_INFO(logger_, "SetVelocityThreshold(%u): %u",
               static_cast<unsigned>(node_id_),
               static_cast<unsigned>(threshold));
   return true;
@@ -243,7 +243,7 @@ bool MotorController::SetVelocityWindow(uint16_t window) {
                  static_cast<unsigned>(node_id_));
     return false;
   }
-  RCLCPP_DEBUG(logger_, "SetVelocityWindow(%u): %u",
+  RCLCPP_INFO(logger_, "SetVelocityWindow(%u): %u",
               static_cast<unsigned>(node_id_),
               static_cast<unsigned>(window));
   return true;
@@ -272,7 +272,7 @@ bool MotorController::SetQuickStopOptionCode(QuickStopOptionCode option) {
                  static_cast<unsigned>(node_id_));
     return false;
   }
-  RCLCPP_DEBUG(logger_, "SetQuickStopOptionCode(%u): %d",
+  RCLCPP_INFO(logger_, "SetQuickStopOptionCode(%u): %d",
               static_cast<unsigned>(node_id_),
               static_cast<int>(option));
   return true;
@@ -300,7 +300,7 @@ bool MotorController::SetQuickStopDeceleration(uint32_t deceleration) {
                  static_cast<unsigned>(node_id_));
     return false;
   }
-  RCLCPP_DEBUG(logger_, "SetQuickStopDeceleration(%u): %u",
+  RCLCPP_INFO(logger_, "SetQuickStopDeceleration(%u): %u",
               static_cast<unsigned>(node_id_),
               static_cast<unsigned>(deceleration));
   return true;
@@ -328,7 +328,7 @@ bool MotorController::SetProfileAcceleration(uint32_t acceleration) {
                  static_cast<unsigned>(node_id_));
     return false;
   }
-  RCLCPP_DEBUG(logger_, "SetProfileAcceleration(%u): %u",
+  RCLCPP_INFO(logger_, "SetProfileAcceleration(%u): %u",
               static_cast<unsigned>(node_id_),
               static_cast<unsigned>(acceleration));
   return true;
@@ -356,7 +356,7 @@ bool MotorController::SetProfileDeceleration(uint32_t deceleration) {
                  static_cast<unsigned>(node_id_));
     return false;
   }
-  RCLCPP_DEBUG(logger_, "SetProfileDeceleration(%u): %u",
+  RCLCPP_INFO(logger_, "SetProfileDeceleration(%u): %u",
               static_cast<unsigned>(node_id_),
               static_cast<unsigned>(deceleration));
   return true;
@@ -384,7 +384,7 @@ bool MotorController::SetEndVelocity(int32_t velocity) {
                  static_cast<unsigned>(node_id_));
     return false;
   }
-  RCLCPP_DEBUG(logger_, "SetEndVelocity(%u): %d",
+  RCLCPP_INFO(logger_, "SetEndVelocity(%u): %d",
               static_cast<unsigned>(node_id_),
               velocity);
   return true;
@@ -437,7 +437,7 @@ bool MotorController::SetMaxTorque(uint16_t max_torque) {
                  static_cast<unsigned>(node_id_));
     return false;
   }
-  RCLCPP_DEBUG(logger_, "SetMaxTorque(%u): %u",
+  RCLCPP_INFO(logger_, "SetMaxTorque(%u): %u",
               static_cast<unsigned>(node_id_),
               static_cast<unsigned>(max_torque));
   return true;
@@ -526,7 +526,7 @@ bool MotorController::GetVelocityActualValue(int32_t* out_velocity) {
 
   std::vector<uint8_t> response_data;
   if (!SdoTransaction(request_data,
-                      motor_controller::kSdoExpectedResponseUpload,
+                      motor_controller::kSdoExpectedResponseUpload4byte,
                       response_data)) {
     return false;
   }

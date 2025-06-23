@@ -22,32 +22,32 @@ def generate_launch_description() -> LaunchDescription:
         name='motion_controller_node',
         output='screen',
         parameters=[params_file],
-        arguments=['--ros-args', '--log-level', 'debug'],
+        arguments=['--ros-args', '--log-level', 'info'],
     )
 
     # Joy ドライバ
-    #joy_node = Node(
-    #    package='joy_linux',
-    #    executable='joy_linux_node',
-    #    name='joy',
-    #    output='screen',
-    #    parameters=[{
-    #        'dev_name': 'Wireless Controller',      # DualShock を自動検出
-    #    }],
-    #)
+    joy_node = Node(
+        package='joy_linux',
+        executable='joy_linux_node',
+        name='joy',
+        output='screen',
+        parameters=[{
+            'dev_name': 'Wireless Controller',      # DualShock を自動検出
+        }],
+    )
 
     # Joy → Twist 変換
-    #joy_teleop_node = Node(
-    #    package='joy_teleop',
-    #    executable='joy_teleop',
-    #    name='joy_teleop',
-    #    output='screen',
-    #    parameters=[teleop_params_file],
-    #)
+    joy_teleop_node = Node(
+        package='joy_teleop',
+        executable='joy_teleop',
+        name='joy_teleop',
+        output='screen',
+        parameters=[teleop_params_file],
+    )
 
     # ─── LaunchDescription ────────────────────────────────────────────
     return LaunchDescription([
         motion_controller_node,
-    #    joy_node,
-    #    joy_teleop_node,
+        joy_node,
+        joy_teleop_node,
     ])

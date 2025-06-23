@@ -144,6 +144,12 @@ void MotionControllerNode::handleServoOff(
 }
 
 void MotionControllerNode::publishMotorState() {
+/*
+  if (motion_controller_->getState() != MotionState::kRunning) {
+      RCLCPP_WARN(get_logger(), "Motion controller is not servo on.");
+      return;
+  }
+*/  
   auto current_time = now();
 
   sensor_msgs::msg::JointState msg;
