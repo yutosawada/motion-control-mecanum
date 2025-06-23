@@ -10,6 +10,7 @@ find_package(rclcpp REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
@@ -27,6 +28,7 @@ ament_target_dependencies(motion_control_mecanum
   geometry_msgs
   std_srvs
   sensor_msgs
+  nav_msgs
 )
 
 add_executable(motion_controller_node
@@ -39,6 +41,7 @@ ament_target_dependencies(motion_controller_node
   geometry_msgs
   std_srvs
   sensor_msgs
+  nav_msgs
 )
 
 install(TARGETS motion_control_mecanum motion_controller_node

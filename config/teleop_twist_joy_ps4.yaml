@@ -1,0 +1,49 @@
+teleop_twist_joy:
+  ros__parameters:
+    axis_linear: 
+      x: 1 
+      y: 3
+      z: -1
+    scale_linear: 
+      x: 0.1  # 最大速度スケール（線形）
+      y: 0.1
+      z: 0.0
+    axis_angular:
+      roll: -1
+      pitch: -1 
+      yaw: 0  # スティックのX軸（回転）
+    scale_angular:
+      roll: 0.0
+      pitch: 0.0 
+      yaw: 0.2  # スティックのX軸（回転）
+    enable_button: 9  # 有効化ボタン（例: Aボタン）
+    enable_turbo_button: -1  # 高速モードボタン（例: Bボタン）
+    scale_linear_turbo: 1.0  # 高速モードの線形速度スケール
+    scale_angular_turbo: 1.0  # 高速モードの角速度スケール
+
+# -axes
+# vertical Left       1
+# horizontal Left     0
+# vertical Right      3
+# horizontal Right    2
+# L2
+# R2
+
+# -buttons
+# ×           0
+# ○           1
+# □           2
+# △          3 
+# SHARE       4
+# PS          5
+# OPTIONS     6
+# Lstick      7
+# Rstick      8
+# L1          9
+# R1          10
+# ↑           11
+# ↓           12
+# ←           13
+# →           14
+#
+#
