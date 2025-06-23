@@ -17,9 +17,6 @@ void MotionControllerNode::initialize(
   declare_parameter("motors.FR_node_id", 2);
   declare_parameter("motors.RL_node_id", 3);
   declare_parameter("motors.RR_node_id", 4);
-  declare_parameter("motor_parameters", rclcpp::ParameterValue());
-  declare_parameter("wheel_parameters", rclcpp::ParameterValue());
-  declare_parameter("control_parameters", rclcpp::ParameterValue());
   declare_parameter("control_parameters.control_frequency", 50.0);
   declare_parameter("control_parameters.max_linear_velocity_x", 1.0);
   declare_parameter("control_parameters.max_linear_velocity_y", 1.0);
