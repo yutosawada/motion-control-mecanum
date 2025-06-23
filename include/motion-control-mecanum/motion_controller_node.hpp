@@ -41,6 +41,8 @@ class MotionControllerNode : public rclcpp::Node {
 
   void publishMotorState();
 
+  void initialize(std::shared_ptr<MotionController> motion_controller);
+
   rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub_;
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr servo_on_service_;
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr servo_off_service_;
