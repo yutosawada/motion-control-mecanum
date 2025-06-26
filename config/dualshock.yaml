@@ -8,13 +8,25 @@ joy_teleop:
       axis_mappings:
         linear-x:
           axis:   1
-          scale:  0.6
+          scale:  0.2
           offset: 0.0        
         linear-y:
           axis:   3          
-          scale:  0.6
+          scale:  0.2
           offset: 0.0
         angular-z:
           axis:   0
-          scale:  1.2
+          scale:  0.4
           offset: 0.0
+    servo_on:
+      type: service
+      interface_type: std_srvs/srv/Trigger
+      service_name: /servo_on
+      deadman_buttons: [4]
+      buttons: [1]  # ○ボタン (DualShockの○ボタンはボタン1)
+    servo_off:
+      type: service
+      interface_type: std_srvs/srv/Trigger
+      service_name: /servo_off
+      deadman_buttons: [4]
+      buttons: [0]  # ×ボタン (DualShockの×ボタンはボタン0)
