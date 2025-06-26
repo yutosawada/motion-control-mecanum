@@ -29,6 +29,8 @@ void MotionControllerNode::initialize(
       declare_parameter<double>("wheel_parameters.wheel_separation_x", 0.30);
   wheel_params.separation_y =
       declare_parameter<double>("wheel_parameters.wheel_separation_y", 0.25);
+  wheel_params.gear_ratio =
+      declare_parameter<double>("wheel_parameters.gear_ratio", 1.0);
 
   std::string can_dev = declare_parameter<std::string>("can_device", "can0");
 
