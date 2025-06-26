@@ -19,10 +19,9 @@
       velocity_threshold: 15
     
     wheel_parameters:
-      wheel_radius: 0.075  # m
-      wheel_distance_x: 0.3  # m
-      wheel_distance_y: 0.25  # m
-      gear_ratio: 100
+      wheel_radius: 0.115  # m
+      wheel_distance_x: 0.8  # m
+      wheel_distance_y: 0.50  # m
     
     control_parameters:
       control_frequency: 50.0  # Hz
