@@ -33,10 +33,14 @@ bool MotionController::compute(const geometry_msgs::msg::Twist& cmd) {
   RCLCPP_DEBUG(logger_, "compute: vx=%.3f vy=%.3f wz=%.3f", vx, vy, wz);
 
   std::array<double, 4> speeds{};
-  speeds[0] = (vx - vy - k * wz) / wheel_params_.radius;  // front left
-  speeds[1] = (vx + vy + k * wz) / wheel_params_.radius;  // front right
-  speeds[2] = (vx + vy - k * wz) / wheel_params_.radius;  // rear left
-  speeds[3] = (vx - vy + k * wz) / wheel_params_.radius;  // rear right
+  speeds[0] =
+      (vx - vy - k * wz) / wheel_params_.radius * wheel_params_.gear_ratio;  // front left
+  speeds[1] =
+      (vx + vy + k * wz) / wheel_params_.radius * wheel_params_.gear_ratio;  // front right
+  speeds[2] =
+      (vx + vy - k * wz) / wheel_params_.radius * wheel_params_.gear_ratio;  // rear left
+  speeds[3] =
+      (vx - vy + k * wz) / wheel_params_.radius * wheel_params_.gear_ratio;  // rear right
 
   RCLCPP_DEBUG(logger_, "target speeds: [%.3f, %.3f, %.3f, %.3f]", speeds[0], speeds[1], speeds[2], speeds[3]);
 
@@ -142,7 +146,7 @@ bool MotionController::computeOdometry(double dt,
 
   std::array<double, 4> w{};
   for (size_t i = 0; i < w.size(); ++i) {
-    w[i] = static_cast<double>(velocities[i]);
+    w[i] = static_cast<double>(velocities[i]) / wheel_params_.gear_ratio;
   }
 
   const double Lx = wheel_params_.separation_x / 2.0;

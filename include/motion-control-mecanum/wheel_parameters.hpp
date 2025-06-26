@@ -7,6 +7,7 @@ struct WheelParameters {
   double radius{0.0};
   double separation_x{0.0};
   double separation_y{0.0};
+  double gear_ratio{1.0};
 };
 
 }  // namespace motion_control_mecanum

@@ -22,6 +22,7 @@
       wheel_radius: 0.075  # m
       wheel_distance_x: 0.3  # m
       wheel_distance_y: 0.25  # m
+      gear_ratio: 100
     
     control_parameters:
       control_frequency: 50.0  # Hz
