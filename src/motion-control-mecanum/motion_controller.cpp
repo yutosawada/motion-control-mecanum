@@ -33,22 +33,26 @@ bool MotionController::compute(const geometry_msgs::msg::Twist& cmd) {
   RCLCPP_DEBUG(logger_, "compute: vx=%.3f vy=%.3f wz=%.3f", vx, vy, wz);
 
   std::array<double, 4> speeds{};
-  speeds[0] =
-      (vx - vy - k * wz) / wheel_params_.radius * wheel_params_.gear_ratio;  // front left
-  speeds[1] =
-      (vx + vy + k * wz) / wheel_params_.radius * wheel_params_.gear_ratio;  // front right
-  speeds[2] =
-      (vx + vy - k * wz) / wheel_params_.radius * wheel_params_.gear_ratio;  // rear left
-  speeds[3] =
-      (vx - vy + k * wz) / wheel_params_.radius * wheel_params_.gear_ratio;  // rear right
+  // Order: FR, FL, RL, RR (matches motor ID order)
+  speeds[static_cast<size_t>(WheelIndex::kFrontRight)] =
+      (vx + vy + k * wz) / wheel_params_.radius * wheel_params_.gear_ratio;
+  speeds[static_cast<size_t>(WheelIndex::kFrontLeft)] =
+      (vx - vy - k * wz) / wheel_params_.radius * wheel_params_.gear_ratio;
+  speeds[static_cast<size_t>(WheelIndex::kRearLeft)] =
+      (vx + vy - k * wz) / wheel_params_.radius * wheel_params_.gear_ratio;
+  speeds[static_cast<size_t>(WheelIndex::kRearRight)] =
+      (vx - vy + k * wz) / wheel_params_.radius * wheel_params_.gear_ratio;
 
-  RCLCPP_DEBUG(logger_, "target speeds: [%.3f, %.3f, %.3f, %.3f]", speeds[0], speeds[1], speeds[2], speeds[3]);
+  RCLCPP_DEBUG(logger_,
+               "target speeds: [FR=%.3f, FL=%.3f, RL=%.3f, RR=%.3f]",
+               speeds[0], speeds[1], speeds[2], speeds[3]);
 
   bool success = true;
   for (size_t i = 0; i < motor_controllers_.size(); ++i) {
     if (motor_controllers_[i]) {
+      const double cmd_speed = speeds[i] * kMotorDirection[i];
       if (!motor_controllers_[i]->SetTargetVelocity(
-              static_cast<int32_t>(speeds[i]))) {
+              static_cast<int32_t>(cmd_speed))) {
         success = false;
       }
     }
@@ -156,9 +160,19 @@ bool MotionController::computeOdometry(double dt,
   }
 
   std::array<double, 4> w{};
-  for (size_t i = 0; i < w.size(); ++i) {
-    w[i] = static_cast<double>(velocities[i]) / wheel_params_.gear_ratio;
-  }
+  // Convert motor velocities to wheel velocities in FL, FR, RL, RR order.
+  w[0] = static_cast<double>(velocities[static_cast<size_t>(WheelIndex::kFrontLeft)]) /
+         wheel_params_.gear_ratio *
+         kMotorDirection[static_cast<size_t>(WheelIndex::kFrontLeft)];
+  w[1] = static_cast<double>(velocities[static_cast<size_t>(WheelIndex::kFrontRight)]) /
+         wheel_params_.gear_ratio *
+         kMotorDirection[static_cast<size_t>(WheelIndex::kFrontRight)];
+  w[2] = static_cast<double>(velocities[static_cast<size_t>(WheelIndex::kRearLeft)]) /
+         wheel_params_.gear_ratio *
+         kMotorDirection[static_cast<size_t>(WheelIndex::kRearLeft)];
+  w[3] = static_cast<double>(velocities[static_cast<size_t>(WheelIndex::kRearRight)]) /
+         wheel_params_.gear_ratio *
+         kMotorDirection[static_cast<size_t>(WheelIndex::kRearRight)];
 
   const double Lx = wheel_params_.separation_x / 2.0;
   const double Ly = wheel_params_.separation_y / 2.0;

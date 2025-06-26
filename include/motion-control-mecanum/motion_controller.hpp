@@ -21,6 +21,16 @@ enum class MotionState {
   kError,
 };
 
+// Wheel index order corresponds to motor IDs.
+// ID1: Front Right, ID2: Front Left (reversed),
+// ID3: Rear Left (reversed), ID4: Rear Right.
+enum WheelIndex {
+  kFrontRight = 0,
+  kFrontLeft = 1,
+  kRearLeft = 2,
+  kRearRight = 3,
+};
+
 class MotionController {
  public:
   explicit MotionController(const WheelParameters& wheel_params);
@@ -45,6 +55,9 @@ class MotionController {
   bool computeOdometry(double dt, nav_msgs::msg::Odometry* out_odom);
 
  private:
+  // Sign for each motor direction. Apply to wheel speed when sending commands
+  // or reading velocities. Order matches WheelIndex.
+  static constexpr std::array<int8_t, 4> kMotorDirection{{1, -1, -1, 1}};
   WheelParameters wheel_params_{};
 
   MotionState state_{MotionState::kIdle};
