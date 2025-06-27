@@ -23,6 +23,7 @@ void MotionControllerNode::initialize(
   declare_parameter("control_parameters.max_angular_velocity", 1.5);
   declare_parameter("odom_frame_id", "odom");
   declare_parameter("base_frame_id", "base_link");
+  declare_parameter("odom_topic_name", "odom");
 
   WheelParameters wheel_params;
   wheel_params.radius =
@@ -77,6 +78,7 @@ void MotionControllerNode::initialize(
       get_parameter("control_parameters.max_angular_velocity").as_double();
   odom_frame_id_ = get_parameter("odom_frame_id").as_string();
   base_frame_id_ = get_parameter("base_frame_id").as_string();
+  odom_topic_name_ = get_parameter("odom_topic_name").as_string();
 
   cmd_vel_sub_ = create_subscription<geometry_msgs::msg::Twist>(
       "cmd_vel", rclcpp::QoS(10),
@@ -93,7 +95,7 @@ void MotionControllerNode::initialize(
   motor_state_pub_ =
       create_publisher<sensor_msgs::msg::JointState>("motor_states", 10);
   odom_pub_ =
-      create_publisher<nav_msgs::msg::Odometry>("odom", 10);
+      create_publisher<nav_msgs::msg::Odometry>(odom_topic_name_, 10);
   last_odom_time_ = now();
 
   publish_timer_ = create_wall_timer(

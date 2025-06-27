@@ -31,6 +31,7 @@
 
     odom_frame_id: "odom"
     base_frame_id: "base_link"
+    odom_topic_name: "odom"
     
     safety_parameters:
       timeout_ms: 500

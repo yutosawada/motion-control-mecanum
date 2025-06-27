@@ -53,6 +53,7 @@ class MotionControllerNode : public rclcpp::Node {
 
   std::string odom_frame_id_{};
   std::string base_frame_id_{};
+  std::string odom_topic_name_{};
 
   rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr motor_state_pub_;
   rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odom_pub_;
