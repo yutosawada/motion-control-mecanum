@@ -2,6 +2,7 @@
 #define MOTION_CONTROL_MECANUM__MOTION_CONTROLLER_NODE_HPP_
 
 #include <memory>
+#include <string>
 
 #include "can/socket_can_interface.hpp"
 #include "geometry_msgs/msg/twist.hpp"
@@ -49,6 +50,10 @@ class MotionControllerNode : public rclcpp::Node {
   std::shared_ptr<can_control::SocketCanInterface> can_interface_;
   std::shared_ptr<MotionController> motion_controller_;
   ControlParameters control_params_{};
+
+  std::string odom_frame_id_{};
+  std::string base_frame_id_{};
+  std::string odom_topic_name_{};
 
   rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr motor_state_pub_;
   rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odom_pub_;
