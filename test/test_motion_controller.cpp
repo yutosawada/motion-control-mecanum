@@ -19,3 +19,11 @@ TEST(MotionControllerTest, StraightY) {
   cmd.linear.y = 1.0;
   EXPECT_TRUE(mc.compute(cmd));
 }
+
+TEST(MotionControllerTest, ServoOn) {
+  motion_control_mecanum::WheelParameters wp{0.1, 0.2, 0.2, 1.0};
+  motion_control_mecanum::MotionController mc(wp);
+  EXPECT_EQ(mc.getState(), motion_control_mecanum::MotionState::kIdle);
+  EXPECT_TRUE(mc.servoOn());
+  EXPECT_EQ(mc.getState(), motion_control_mecanum::MotionState::kRunning);
+}
