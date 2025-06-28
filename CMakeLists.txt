@@ -22,6 +22,7 @@ add_library(motion_control_mecanum
   src/motion-control-mecanum/motion_controller.cpp
   src/motion-control-mecanum/motor_controller.cpp
   src/can/socket_can_interface.cpp
+  src/motion-control-mecanum/motion_controller_node.cpp
 )
 ament_target_dependencies(motion_control_mecanum
   rclcpp
@@ -32,7 +33,6 @@ ament_target_dependencies(motion_control_mecanum
 )
 
 add_executable(motion_controller_node
-  src/motion-control-mecanum/motion_controller_node.cpp
   src/motion-control-mecanum/motion_controller_entrypoint.cpp
 )
 target_link_libraries(motion_controller_node motion_control_mecanum)
@@ -66,6 +66,11 @@ if(BUILD_TESTING)
   if(TARGET test_motor_controller_can)
     target_link_libraries(test_motor_controller_can motion_control_mecanum)
     ament_target_dependencies(test_motor_controller_can geometry_msgs)
+  endif()
+  ament_add_gtest(test_motion_controller_node test/test_motion_controller_node.cpp)
+  if(TARGET test_motion_controller_node)
+    target_link_libraries(test_motion_controller_node motion_control_mecanum)
+    ament_target_dependencies(test_motion_controller_node rclcpp std_srvs sensor_msgs)
   endif()
 endif()
 
