@@ -10,10 +10,6 @@ on:
         type: string
         required: false
         default: motion-control-mecanum
-      ros_distro:
-        type: string
-        required: false
-        default: humble
 
 jobs:
   build-and-test:
@@ -22,7 +18,7 @@ jobs:
     strategy:
       matrix:
         # List ROS 2 distributions to test against
-        ros_distro: [${{ inputs.ros_distro }}]
+        ros_distro: [humble]
 
     container:
       image: ros:${{ matrix.ros_distro }}-ros-base-jammy  # Ubuntu22.04 + ROS2
