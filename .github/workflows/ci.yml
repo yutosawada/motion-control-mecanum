@@ -128,3 +128,28 @@ jobs:
         name: gtest-report-${{ matrix.ros_distro }}
         path: ros2_ws/gtest_html
         retention-days: 30
+
+    # 13. サイクロマティック複雑度の計測ツール導入 --------------------------
+    - name: Install lizard for complexity analysis
+      if: always()
+      shell: bash
+      run: |
+        pip install --no-cache-dir lizard
+
+    # 14. サイクロマティック複雑度を計測して HTML 生成 ----------------------
+    - name: Generate cyclomatic complexity report
+      if: always()
+      shell: bash
+      working-directory: ros2_ws
+      run: |
+        mkdir -p complexity_html
+        lizard --html -o complexity_html/index.html src/motion-control-mecanum src/can include/motion-control-mecanum include/can
+
+    # 15. 複雑度レポートをアーティファクトとして保存 -----------------------
+    - name: Upload complexity HTML artifact
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: complexity-report-${{ matrix.ros_distro }}
+        path: ros2_ws/complexity_html
+        retention-days: 30
