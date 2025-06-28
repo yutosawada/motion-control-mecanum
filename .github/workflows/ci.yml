@@ -101,3 +101,30 @@ jobs:
         name: lcov-report-${{ matrix.ros_distro }}
         path: ros2_ws/lcov
         retention-days: 30
+
+    # 11. gtest 結果を HTML 化 ----------------------------------------------
+    - name: Convert gtest results to HTML
+      if: always()
+      shell: bash
+      working-directory: ros2_ws
+      run: |
+        pip install --no-cache-dir junitparser junit2html
+        mkdir -p gtest_html
+        python3 - <<'EOF'
+        import glob
+        from junitparser import JUnitXml
+        merged = JUnitXml()
+        for path in glob.glob('build/**/test_results/**/*.xml', recursive=True):
+            merged += JUnitXml.fromfile(path)
+        merged.write('gtest_html/merged.xml')
+        EOF
+        junit2html gtest_html/merged.xml gtest_html/index.html
+
+    # 12. gtest HTML をアーティファクトとして保存 ---------------------------
+    - name: Upload gtest HTML artifact
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: gtest-report-${{ matrix.ros_distro }}
+        path: ros2_ws/gtest_html
+        retention-days: 30
