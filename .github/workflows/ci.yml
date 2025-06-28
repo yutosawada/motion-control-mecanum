@@ -143,7 +143,7 @@ jobs:
       working-directory: ros2_ws
       run: |
         mkdir -p complexity_html
-        lizard -HTML -o complexity_html/index.html src/motion-control-mecanum src/can include/motion-control-mecanum include/can
+        lizard --html -o complexity_html/index.html src/motion-control-mecanum src/can include/motion-control-mecanum include/can
 
     # 15. 複雑度レポートをアーティファクトとして保存 -----------------------
     - name: Upload complexity HTML artifact
