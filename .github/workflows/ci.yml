@@ -4,6 +4,16 @@ on:
   pull_request:
     branches: [main, develop]
   workflow_dispatch: {}
+  workflow_call:
+    inputs:
+      repo-path:
+        type: string
+        required: false
+        default: motion-control-mecanum
+      ros_distro:
+        type: string
+        required: false
+        default: humble
 
 jobs:
   build-and-test:
@@ -11,7 +21,7 @@ jobs:
 
     strategy:
       matrix:
-        ros_distro: [humble]      # iron / jazzy を追加する場合はここに列挙
+        ros_distro: [${{ inputs.ros_distro }}]      # iron / jazzy を追加する場合はここに列挙
 
     container:
       image: ros:${{ matrix.ros_distro }}-ros-base-jammy  # Ubuntu22.04 + ROS2
@@ -24,7 +34,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
       with:
-        path: ros2_ws/src/motion-control-mecanum
+        path: ros2_ws/src/${{ inputs['repo-path'] }}
 
     # 2. APT キャッシュ ------------------------------------------------------
     - name: Cache APT packages
@@ -128,7 +138,7 @@ jobs:
       working-directory: ros2_ws
       run: |
         mkdir -p complexity_html
-        lizard --html -o complexity_html/index.html src/motion-control-mecanum src/can include/motion-control-mecanum include/can
+        lizard --html -o complexity_html/index.html src/${{ inputs['repo-path'] }}/src src/${{ inputs['repo-path'] }}/include
 
     # 13. 生成したレポートをまとめてアーティファクトとして保存 -------------
     - name: Upload CI reports artifact
