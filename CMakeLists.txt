@@ -22,6 +22,7 @@ add_library(motion_control_mecanum
   src/motion-control-mecanum/motion_controller.cpp
   src/motion-control-mecanum/motor_controller.cpp
   src/can/socket_can_interface.cpp
+  src/motion-control-mecanum/motion_controller_node.cpp
 )
 ament_target_dependencies(motion_control_mecanum
   rclcpp
@@ -32,7 +33,6 @@ ament_target_dependencies(motion_control_mecanum
 )
 
 add_executable(motion_controller_node
-  src/motion-control-mecanum/motion_controller_node.cpp
   src/motion-control-mecanum/motion_controller_entrypoint.cpp
 )
 target_link_libraries(motion_controller_node motion_control_mecanum)
