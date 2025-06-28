@@ -21,7 +21,8 @@ jobs:
 
     strategy:
       matrix:
-        ros_distro: [${{ inputs.ros_distro }}]      # iron / jazzy を追加する場合はここに列挙
+        # List ROS 2 distributions to test against
+        ros_distro: [${{ inputs.ros_distro }}]
 
     container:
       image: ros:${{ matrix.ros_distro }}-ros-base-jammy  # Ubuntu22.04 + ROS2
