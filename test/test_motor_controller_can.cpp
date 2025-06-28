@@ -118,3 +118,183 @@ TEST(MotorControllerCAN, ReadStatusword) {
   EXPECT_EQ(f.data[2], 0x60);
   EXPECT_EQ(f.data[3], 0x00);
 }
+
+TEST(MotorControllerCAN, FaultReset) {
+  auto mock = std::make_shared<MockCanInterface>();
+
+  motion_control_mecanum::MotorParameters params{};
+  motion_control_mecanum::MotorController mc(mock, 1, params);
+  mock->sent_frames.clear();
+  mock->recv_frames.clear();
+
+  CanFrame resp;
+  resp.arbitration_id = motor_controller::kSdoResponseBaseId + 1;
+  resp.dlc = 8;
+  resp.data = std::vector<uint8_t>{
+      motor_controller::kSdoExpectedResponseDownload, 0, 0, 0, 0, 0, 0, 0};
+  mock->recv_frames.push_back(resp);
+
+  EXPECT_TRUE(mc.FaultReset());
+  ASSERT_EQ(mock->sent_frames.size(), 1u);
+  const auto& f = mock->sent_frames[0];
+  EXPECT_EQ(f.arbitration_id, motor_controller::kSdoRequestBaseId + 1);
+  EXPECT_EQ(f.dlc, motor_controller::kSdoDlc);
+  EXPECT_EQ(f.data[0], motor_controller::kSdoDownload2byteCmd);
+  EXPECT_EQ(f.data[1], 0x40);
+  EXPECT_EQ(f.data[2], 0x60);
+  EXPECT_EQ(f.data[3], 0x00);
+  EXPECT_EQ(f.data[4], static_cast<uint8_t>(motor_controller::kFaultResetValue & 0xFF));
+  EXPECT_EQ(f.data[5], static_cast<uint8_t>((motor_controller::kFaultResetValue >> 8) & 0xFF));
+  EXPECT_EQ(f.data[6], 0x00);
+  EXPECT_EQ(f.data[7], 0x00);
+}
+
+TEST(MotorControllerCAN, Shutdown) {
+  auto mock = std::make_shared<MockCanInterface>();
+
+  motion_control_mecanum::MotorParameters params{};
+  motion_control_mecanum::MotorController mc(mock, 1, params);
+  mock->sent_frames.clear();
+  mock->recv_frames.clear();
+
+  CanFrame resp;
+  resp.arbitration_id = motor_controller::kSdoResponseBaseId + 1;
+  resp.dlc = 8;
+  resp.data = std::vector<uint8_t>{
+      motor_controller::kSdoExpectedResponseDownload, 0, 0, 0, 0, 0, 0, 0};
+  mock->recv_frames.push_back(resp);
+
+  EXPECT_TRUE(mc.Shutdown());
+  ASSERT_EQ(mock->sent_frames.size(), 1u);
+  const auto& f = mock->sent_frames[0];
+  EXPECT_EQ(f.arbitration_id, motor_controller::kSdoRequestBaseId + 1);
+  EXPECT_EQ(f.dlc, motor_controller::kSdoDlc);
+  EXPECT_EQ(f.data[0], motor_controller::kSdoDownload2byteCmd);
+  EXPECT_EQ(f.data[1], 0x40);
+  EXPECT_EQ(f.data[2], 0x60);
+  EXPECT_EQ(f.data[3], 0x00);
+  EXPECT_EQ(f.data[4], static_cast<uint8_t>(motor_controller::kShutdownValue & 0xFF));
+  EXPECT_EQ(f.data[5], static_cast<uint8_t>((motor_controller::kShutdownValue >> 8) & 0xFF));
+  EXPECT_EQ(f.data[6], 0x00);
+  EXPECT_EQ(f.data[7], 0x00);
+}
+
+TEST(MotorControllerCAN, SwitchOn) {
+  auto mock = std::make_shared<MockCanInterface>();
+
+  motion_control_mecanum::MotorParameters params{};
+  motion_control_mecanum::MotorController mc(mock, 1, params);
+  mock->sent_frames.clear();
+  mock->recv_frames.clear();
+
+  CanFrame resp;
+  resp.arbitration_id = motor_controller::kSdoResponseBaseId + 1;
+  resp.dlc = 8;
+  resp.data = std::vector<uint8_t>{
+      motor_controller::kSdoExpectedResponseDownload, 0, 0, 0, 0, 0, 0, 0};
+  mock->recv_frames.push_back(resp);
+
+  EXPECT_TRUE(mc.SwitchOn());
+  ASSERT_EQ(mock->sent_frames.size(), 1u);
+  const auto& f = mock->sent_frames[0];
+  EXPECT_EQ(f.arbitration_id, motor_controller::kSdoRequestBaseId + 1);
+  EXPECT_EQ(f.dlc, motor_controller::kSdoDlc);
+  EXPECT_EQ(f.data[0], motor_controller::kSdoDownload2byteCmd);
+  EXPECT_EQ(f.data[1], 0x40);
+  EXPECT_EQ(f.data[2], 0x60);
+  EXPECT_EQ(f.data[3], 0x00);
+  EXPECT_EQ(f.data[4], static_cast<uint8_t>(motor_controller::kSwitchOnValue & 0xFF));
+  EXPECT_EQ(f.data[5], static_cast<uint8_t>((motor_controller::kSwitchOnValue >> 8) & 0xFF));
+  EXPECT_EQ(f.data[6], 0x00);
+  EXPECT_EQ(f.data[7], 0x00);
+}
+
+TEST(MotorControllerCAN, EnableOperation) {
+  auto mock = std::make_shared<MockCanInterface>();
+
+  motion_control_mecanum::MotorParameters params{};
+  motion_control_mecanum::MotorController mc(mock, 1, params);
+  mock->sent_frames.clear();
+  mock->recv_frames.clear();
+
+  CanFrame resp;
+  resp.arbitration_id = motor_controller::kSdoResponseBaseId + 1;
+  resp.dlc = 8;
+  resp.data = std::vector<uint8_t>{
+      motor_controller::kSdoExpectedResponseDownload, 0, 0, 0, 0, 0, 0, 0};
+  mock->recv_frames.push_back(resp);
+
+  EXPECT_TRUE(mc.EnableOperation());
+  ASSERT_EQ(mock->sent_frames.size(), 1u);
+  const auto& f = mock->sent_frames[0];
+  EXPECT_EQ(f.arbitration_id, motor_controller::kSdoRequestBaseId + 1);
+  EXPECT_EQ(f.dlc, motor_controller::kSdoDlc);
+  EXPECT_EQ(f.data[0], motor_controller::kSdoDownload2byteCmd);
+  EXPECT_EQ(f.data[1], 0x40);
+  EXPECT_EQ(f.data[2], 0x60);
+  EXPECT_EQ(f.data[3], 0x00);
+  EXPECT_EQ(f.data[4], static_cast<uint8_t>(motor_controller::kEnableOperationValue & 0xFF));
+  EXPECT_EQ(f.data[5], static_cast<uint8_t>((motor_controller::kEnableOperationValue >> 8) & 0xFF));
+  EXPECT_EQ(f.data[6], 0x00);
+  EXPECT_EQ(f.data[7], 0x00);
+}
+
+TEST(MotorControllerCAN, DisableVoltage) {
+  auto mock = std::make_shared<MockCanInterface>();
+
+  motion_control_mecanum::MotorParameters params{};
+  motion_control_mecanum::MotorController mc(mock, 1, params);
+  mock->sent_frames.clear();
+  mock->recv_frames.clear();
+
+  CanFrame resp;
+  resp.arbitration_id = motor_controller::kSdoResponseBaseId + 1;
+  resp.dlc = 8;
+  resp.data = std::vector<uint8_t>{
+      motor_controller::kSdoExpectedResponseDownload, 0, 0, 0, 0, 0, 0, 0};
+  mock->recv_frames.push_back(resp);
+
+  EXPECT_TRUE(mc.DisableVoltage());
+  ASSERT_EQ(mock->sent_frames.size(), 1u);
+  const auto& f = mock->sent_frames[0];
+  EXPECT_EQ(f.arbitration_id, motor_controller::kSdoRequestBaseId + 1);
+  EXPECT_EQ(f.dlc, motor_controller::kSdoDlc);
+  EXPECT_EQ(f.data[0], motor_controller::kSdoDownload2byteCmd);
+  EXPECT_EQ(f.data[1], 0x40);
+  EXPECT_EQ(f.data[2], 0x60);
+  EXPECT_EQ(f.data[3], 0x00);
+  EXPECT_EQ(f.data[4], static_cast<uint8_t>(motor_controller::kDisableVoltageValue & 0xFF));
+  EXPECT_EQ(f.data[5], static_cast<uint8_t>((motor_controller::kDisableVoltageValue >> 8) & 0xFF));
+  EXPECT_EQ(f.data[6], 0x00);
+  EXPECT_EQ(f.data[7], 0x00);
+}
+
+TEST(MotorControllerCAN, DisableOperation) {
+  auto mock = std::make_shared<MockCanInterface>();
+
+  motion_control_mecanum::MotorParameters params{};
+  motion_control_mecanum::MotorController mc(mock, 1, params);
+  mock->sent_frames.clear();
+  mock->recv_frames.clear();
+
+  CanFrame resp;
+  resp.arbitration_id = motor_controller::kSdoResponseBaseId + 1;
+  resp.dlc = 8;
+  resp.data = std::vector<uint8_t>{
+      motor_controller::kSdoExpectedResponseDownload, 0, 0, 0, 0, 0, 0, 0};
+  mock->recv_frames.push_back(resp);
+
+  EXPECT_TRUE(mc.DisableOperation());
+  ASSERT_EQ(mock->sent_frames.size(), 1u);
+  const auto& f = mock->sent_frames[0];
+  EXPECT_EQ(f.arbitration_id, motor_controller::kSdoRequestBaseId + 1);
+  EXPECT_EQ(f.dlc, motor_controller::kSdoDlc);
+  EXPECT_EQ(f.data[0], motor_controller::kSdoDownload2byteCmd);
+  EXPECT_EQ(f.data[1], 0x40);
+  EXPECT_EQ(f.data[2], 0x60);
+  EXPECT_EQ(f.data[3], 0x00);
+  EXPECT_EQ(f.data[4], static_cast<uint8_t>(motor_controller::kDisableOperationValue & 0xFF));
+  EXPECT_EQ(f.data[5], static_cast<uint8_t>((motor_controller::kDisableOperationValue >> 8) & 0xFF));
+  EXPECT_EQ(f.data[6], 0x00);
+  EXPECT_EQ(f.data[7], 0x00);
+}
