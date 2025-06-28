@@ -2,7 +2,7 @@ name: ROS 2 CI (colcon + coverage)
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, develop]
   workflow_dispatch: {}
 
 jobs:
@@ -94,10 +94,50 @@ jobs:
         colcon lcov-result
         ls -R lcov | head -n 20   # デバッグ用（省いても良い）
 
-    # 10. HTML をアーティファクトとして保存 ---------------------------------
-    - name: Upload coverage artifact
+
+    # 10. gtest 結果を HTML 化 ----------------------------------------------
+    - name: Convert gtest results to HTML
+      if: always()
+      shell: bash
+      working-directory: ros2_ws
+      run: |
+        pip install --no-cache-dir junitparser junit2html
+        mkdir -p gtest_html
+        python3 - <<'EOF'
+        import glob
+        from junitparser import JUnitXml
+        merged = JUnitXml()
+        for path in glob.glob('build/**/test_results/**/*.xml', recursive=True):
+            merged += JUnitXml.fromfile(path)
+        merged.write('gtest_html/merged.xml')
+        EOF
+        junit2html gtest_html/merged.xml gtest_html/index.html
+
+
+    # 11. サイクロマティック複雑度の計測ツール導入 --------------------------
+    - name: Install lizard for complexity analysis
+      if: always()
+      shell: bash
+      run: |
+        pip install --no-cache-dir lizard
+
+    # 12. サイクロマティック複雑度を計測して HTML 生成 ----------------------
+    - name: Generate cyclomatic complexity report
+      if: always()
+      shell: bash
+      working-directory: ros2_ws
+      run: |
+        mkdir -p complexity_html
+        lizard --html -o complexity_html/index.html src/motion-control-mecanum src/can include/motion-control-mecanum include/can
+
+    # 13. 生成したレポートをまとめてアーティファクトとして保存 -------------
+    - name: Upload CI reports artifact
+      if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: lcov-report-${{ matrix.ros_distro }}
-        path: ros2_ws/lcov
+        name: ci-reports-${{ matrix.ros_distro }}
+        path: |
+          ros2_ws/lcov
+          ros2_ws/gtest_html
+          ros2_ws/complexity_html
         retention-days: 30
