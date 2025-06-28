@@ -18,3 +18,8 @@ This package provides a simple example of a mecanum wheel motion controller for 
 * Ability to read the torque actual value (`0x6077`).
 * Ability to read the velocity actual value (`0x606C`).
 * Servo ON/OFF services to control motor power state.
+
+### Integration Testing
+
+This package includes GTest-based integration tests for the `MotionControllerNode` covering its services and topic publishers.
+
