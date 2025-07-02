@@ -6,6 +6,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "std_srvs/srv/trigger.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
+#include "tf2_msgs/msg/tf_message.hpp"
 
 #include "motion-control-mecanum/motion_controller_node.hpp"
 #include "motion-control-mecanum/wheel_parameters.hpp"
@@ -70,5 +71,20 @@ TEST_F(MotionControllerNodeFixture, MotorStatePublisher) {
   for (double e : msg->effort) {
     EXPECT_EQ(e, 0.0);
   }
+}
+
+TEST_F(MotionControllerNodeFixture, TfBroadcaster) {
+  tf2_msgs::msg::TFMessage::SharedPtr msg;
+  auto sub = test_node_->create_subscription<tf2_msgs::msg::TFMessage>(
+      "/tf", 10, [&](tf2_msgs::msg::TFMessage::SharedPtr m) { msg = m; });
+  (void)sub;
+  auto start = std::chrono::steady_clock::now();
+  while (rclcpp::ok() && !msg && (std::chrono::steady_clock::now() - start) < 1s) {
+    executor_->spin_once(100ms);
+  }
+  ASSERT_TRUE(msg != nullptr);
+  ASSERT_FALSE(msg->transforms.empty());
+  EXPECT_EQ(msg->transforms[0].header.frame_id, "odom");
+  EXPECT_EQ(msg->transforms[0].child_frame_id, "base_link");
 }
 

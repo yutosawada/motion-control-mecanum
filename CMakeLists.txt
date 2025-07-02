@@ -11,6 +11,8 @@ find_package(geometry_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(tf2_msgs REQUIRED)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
@@ -30,6 +32,7 @@ ament_target_dependencies(motion_control_mecanum
   std_srvs
   sensor_msgs
   nav_msgs
+  tf2_ros
 )
 
 add_executable(motion_controller_node
@@ -42,6 +45,7 @@ ament_target_dependencies(motion_controller_node
   std_srvs
   sensor_msgs
   nav_msgs
+  tf2_ros
 )
 
 install(TARGETS motion_control_mecanum motion_controller_node
@@ -70,7 +74,7 @@ if(BUILD_TESTING)
   ament_add_gtest(test_motion_controller_node test/test_motion_controller_node.cpp)
   if(TARGET test_motion_controller_node)
     target_link_libraries(test_motion_controller_node motion_control_mecanum)
-    ament_target_dependencies(test_motion_controller_node rclcpp std_srvs sensor_msgs)
+    ament_target_dependencies(test_motion_controller_node rclcpp std_srvs sensor_msgs tf2_ros tf2_msgs)
   endif()
 endif()
 
