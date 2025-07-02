@@ -98,6 +98,8 @@ void MotionControllerNode::initialize(
       create_publisher<nav_msgs::msg::Odometry>(odom_topic_name_, 10);
   last_odom_time_ = now();
 
+  tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(this);
+
   publish_timer_ = create_wall_timer(
       std::chrono::duration<double>(1.0 / control_params_.control_frequency),
       std::bind(&MotionControllerNode::publishMotorState, this));
@@ -181,12 +183,33 @@ void MotionControllerNode::publishMotorState() {
   nav_msgs::msg::Odometry odom;
   double dt = (current_time - last_odom_time_).seconds();
   last_odom_time_ = current_time;
-  if (motion_controller_->computeOdometry(dt, &odom)) {
+  bool odom_valid = motion_controller_->computeOdometry(dt, &odom);
+  if (odom_valid) {
     odom.header.stamp = current_time;
     odom.header.frame_id = odom_frame_id_;
     odom.child_frame_id = base_frame_id_;
     odom_pub_->publish(odom);
   }
+
+  geometry_msgs::msg::TransformStamped tf_msg;
+  tf_msg.header.stamp = current_time;
+  tf_msg.header.frame_id = odom_frame_id_;
+  tf_msg.child_frame_id = base_frame_id_;
+  if (odom_valid) {
+    tf_msg.transform.translation.x = odom.pose.pose.position.x;
+    tf_msg.transform.translation.y = odom.pose.pose.position.y;
+    tf_msg.transform.translation.z = odom.pose.pose.position.z;
+    tf_msg.transform.rotation = odom.pose.pose.orientation;
+  } else {
+    tf_msg.transform.translation.x = 0.0;
+    tf_msg.transform.translation.y = 0.0;
+    tf_msg.transform.translation.z = 0.0;
+    tf_msg.transform.rotation.x = 0.0;
+    tf_msg.transform.rotation.y = 0.0;
+    tf_msg.transform.rotation.z = 0.0;
+    tf_msg.transform.rotation.w = 1.0;
+  }
+  tf_broadcaster_->sendTransform(tf_msg);
 }
 
 }  // namespace motion_control_mecanum
