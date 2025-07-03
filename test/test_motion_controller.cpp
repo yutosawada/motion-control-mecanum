@@ -121,3 +121,20 @@ TEST(MotionControllerTest, ComputeOdometry) {
   EXPECT_NEAR(odom.twist.twist.linear.y, 0.0, 1e-6);
   EXPECT_NEAR(odom.twist.twist.angular.z, 0.0, 1e-6);
 }
+
+TEST(MotionControllerTest, ComputeOdometryRotationRightHand) {
+  auto mock_can = std::make_shared<MockSocketCanInterface>();
+  motion_control_mecanum::MotorParameters mp{};
+  std::array<uint8_t, 4> node_ids{{1, 2, 3, 4}};
+  motion_control_mecanum::WheelParameters wp{0.1, 0.2, 0.2, 1.0};
+  motion_control_mecanum::MotionController mc(mock_can, node_ids, mp, wp);
+
+  mock_can->recv_frames.push_back(makeVelocityResp(1, 10));
+  mock_can->recv_frames.push_back(makeVelocityResp(2, 10));
+  mock_can->recv_frames.push_back(makeVelocityResp(3, 10));
+  mock_can->recv_frames.push_back(makeVelocityResp(4, 10));
+
+  nav_msgs::msg::Odometry odom;
+  ASSERT_TRUE(mc.computeOdometry(1.0, &odom));
+  EXPECT_LT(odom.pose.pose.orientation.z, 0.0);
+}
