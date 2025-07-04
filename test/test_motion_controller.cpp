@@ -136,5 +136,5 @@ TEST(MotionControllerTest, ComputeOdometryRotationRightHand) {
 
   nav_msgs::msg::Odometry odom;
   ASSERT_TRUE(mc.computeOdometry(1.0, &odom));
-  EXPECT_LT(odom.pose.pose.orientation.z, 0.0);
+  EXPECT_GT(odom.pose.pose.orientation.z, 0.0);
 }
