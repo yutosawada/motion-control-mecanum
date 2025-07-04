@@ -54,10 +54,10 @@ install(TARGETS motion_control_mecanum motion_controller_node
 install(DIRECTORY include/
   DESTINATION include)
 
-install(DIRECTORY launch/
+install(DIRECTORY launch
   DESTINATION share/${PROJECT_NAME}/)
 
-install(DIRECTORY config/
+install(DIRECTORY config
   DESTINATION share/${PROJECT_NAME}/)
 
 if(BUILD_TESTING)
