@@ -181,9 +181,9 @@ bool MotionController::computeOdometry(double dt,
   const double vx = wheel_params_.radius *
                     (w[0] + w[1] + w[2] + w[3]) / 4.0;
   // Convert from left-handed to right-handed coordinates
-  const double vy = -wheel_params_.radius *
+  const double vy = wheel_params_.radius *
                     (-w[0] + w[1] + w[2] - w[3]) / 4.0;
-  const double wz = -wheel_params_.radius *
+  const double wz = wheel_params_.radius *
                     (-w[0] + w[1] - w[2] + w[3]) / (4.0 * k);
 
   pose_x_ += (vx * std::cos(pose_yaw_) - vy * std::sin(pose_yaw_)) * dt;
