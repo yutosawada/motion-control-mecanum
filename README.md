@@ -18,3 +18,20 @@ This package provides a simple example of a mecanum wheel motion controller for 
 * Ability to read the torque actual value (`0x6077`).
 * Ability to read the velocity actual value (`0x606C`).
 * Servo ON/OFF services to control motor power state.
+
+### Reusable CI Workflow
+
+This repository exposes a reusable GitHub Actions workflow at
+`.github/workflows/ci.yml`. Other ROS 2 packages can invoke it using
+`workflow_call`:
+
+```yaml
+name: CI
+on:
+  pull_request:
+jobs:
+  build-and-test:
+    uses: <owner>/motion-control-mecanum/.github/workflows/ci.yml@main
+    with:
+      repo-path: <your-package-name>
+```
