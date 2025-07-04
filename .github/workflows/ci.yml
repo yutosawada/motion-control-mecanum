@@ -12,139 +12,217 @@ on:
         default: motion-control-mecanum
 
 jobs:
-  build-and-test:
+  install-dependencies:
     runs-on: ubuntu-22.04
-
     strategy:
       matrix:
-        # List ROS 2 distributions to test against
         ros_distro: [humble]
-
     container:
-      image: ros:${{ matrix.ros_distro }}-ros-base-jammy  # Ubuntu22.04 + ROS2
-
+      image: ros:${{ matrix.ros_distro }}-ros-base-jammy
     env:
       ROS_DISTRO: ${{ matrix.ros_distro }}
-
     steps:
-    # 1. ソース取得 ----------------------------------------------------------
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        path: ros2_ws/src/${{ inputs['repo-path'] }}
+      # 1. ソース取得 ------------------------------------------------------
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          path: ros2_ws/src/${{ inputs['repo-path'] }}
 
-    # 2. APT キャッシュ ------------------------------------------------------
-    - name: Cache APT packages
-      uses: actions/cache@v4
-      with:
-        path: /var/cache/apt/archives
-        key:  apt-${{ runner.os }}-${{ matrix.ros_distro }}-${{ hashFiles('**/package.xml') }}
-        restore-keys: |
-          apt-${{ runner.os }}-${{ matrix.ros_distro }}-
+      # 2. APT キャッシュ --------------------------------------------------
+      - name: Cache APT packages
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt/archives
+          key: apt-${{ runner.os }}-${{ matrix.ros_distro }}-${{ hashFiles('**/package.xml') }}
+          restore-keys: |
+            apt-${{ runner.os }}-${{ matrix.ros_distro }}-
 
-    # 3. カバレッジ計測ツールを導入 ------------------------------------------
-    - name: Install coverage tooling (lcov + colcon plugin)
-      shell: bash
-      run: |
-        apt-get update
-        # lcov本体 + colconプラグイン / mixin
-        DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-          lcov python3-colcon-lcov-result python3-colcon-mixin
-        # mixin の定義を取得
-        colcon mixin add default https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
-        colcon mixin update
+      # 3. カバレッジ計測ツールを導入 --------------------------------------
+      - name: Install coverage tooling (lcov + colcon plugin)
+        shell: bash
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            lcov python3-colcon-lcov-result python3-colcon-mixin
+          colcon mixin add default https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
+          colcon mixin update
 
-    # 4. ROS ツールチェーン --------------------------------------------------
-    - name: Setup ROS
-      uses: ros-tooling/setup-ros@v0.7
-      with:
-        required-ros-distributions: ${{ env.ROS_DISTRO }}
+      # 4. ROS ツールチェーン ----------------------------------------------
+      - name: Setup ROS
+        uses: ros-tooling/setup-ros@v0.7
+        with:
+          required-ros-distributions: ${{ env.ROS_DISTRO }}
 
-    # 5. 依存パッケージをインストール ----------------------------------------
-    - name: rosdep install
-      shell: bash
-      run: |
-        rosdep update -y
-        rosdep install --from-paths ros2_ws --ignore-src -r -y --rosdistro $ROS_DISTRO
+      # 5. 依存パッケージをインストール ------------------------------------
+      - name: rosdep install
+        shell: bash
+        run: |
+          rosdep update -y
+          rosdep install --from-paths ros2_ws --ignore-src -r -y --rosdistro $ROS_DISTRO
 
-    # 6. ビルド（カバレッジフラグ付き）---------------------------------------
-    - name: colcon build (with coverage)
-      shell: bash
-      working-directory: ros2_ws
-      run: |
-        source /opt/ros/$ROS_DISTRO/setup.bash
-        # coverage-gcc mixin で C/C++ 用カバレッジフラグを自動付与
-        colcon build --event-handlers console_direct+ --mixin coverage-gcc
+  build:
+    runs-on: ubuntu-22.04
+    needs: install-dependencies
+    strategy:
+      matrix:
+        ros_distro: [humble]
+    container:
+      image: ros:${{ matrix.ros_distro }}-ros-base-jammy
+    env:
+      ROS_DISTRO: ${{ matrix.ros_distro }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          path: ros2_ws/src/${{ inputs['repo-path'] }}
 
-    # 7. ゼロ・カバレッジのベースライン作成 ----------------------------------
-    - name: Initialise coverage counters
-      shell: bash
-      working-directory: ros2_ws
-      run: |
-        colcon lcov-result --initial
+      - name: Cache APT packages
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt/archives
+          key: apt-${{ runner.os }}-${{ matrix.ros_distro }}-${{ hashFiles('**/package.xml') }}
+          restore-keys: |
+            apt-${{ runner.os }}-${{ matrix.ros_distro }}-
 
-    # 8. テスト実行 ----------------------------------------------------------
-    - name: colcon test
-      shell: bash
-      working-directory: ros2_ws
-      run: |
-        source install/setup.bash
-        colcon test --event-handlers console_direct+
-        colcon test-result --verbose
+      - name: Install coverage tooling (lcov + colcon plugin)
+        shell: bash
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            lcov python3-colcon-lcov-result python3-colcon-mixin
+          colcon mixin add default https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
+          colcon mixin update
 
-    # 9. レポート生成 --------------------------------------------------------
-    - name: Generate lcov report
-      shell: bash
-      working-directory: ros2_ws
-      run: |
-        # aggregate -> lcov/ ディレクトリに HTML 出力
-        colcon lcov-result
-        ls -R lcov | head -n 20   # デバッグ用（省いても良い）
+      - name: Setup ROS
+        uses: ros-tooling/setup-ros@v0.7
+        with:
+          required-ros-distributions: ${{ env.ROS_DISTRO }}
 
+      - name: rosdep install
+        shell: bash
+        run: |
+          rosdep update -y
+          rosdep install --from-paths ros2_ws --ignore-src -r -y --rosdistro $ROS_DISTRO
 
-    # 10. gtest 結果を HTML 化 ----------------------------------------------
-    - name: Convert gtest results to HTML
-      if: always()
-      shell: bash
-      working-directory: ros2_ws
-      run: |
-        pip install --no-cache-dir junitparser junit2html
-        mkdir -p gtest_html
-        python3 - <<'EOF'
-        import glob
-        from junitparser import JUnitXml
-        merged = JUnitXml()
-        for path in glob.glob('build/**/test_results/**/*.xml', recursive=True):
-            merged += JUnitXml.fromfile(path)
-        merged.write('gtest_html/merged.xml')
-        EOF
-        junit2html gtest_html/merged.xml gtest_html/index.html
+      # ビルド（カバレッジフラグ付き）------------------------------------
+      - name: colcon build (with coverage)
+        shell: bash
+        working-directory: ros2_ws
+        run: |
+          source /opt/ros/$ROS_DISTRO/setup.bash
+          colcon build --event-handlers console_direct+ --mixin coverage-gcc
 
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.ros_distro }}
+          path: ros2_ws
 
-    # 11. サイクロマティック複雑度の計測ツール導入 --------------------------
-    - name: Install lizard for complexity analysis
-      if: always()
-      shell: bash
-      run: |
-        pip install --no-cache-dir lizard
+  test-and-report:
+    runs-on: ubuntu-22.04
+    needs: build
+    strategy:
+      matrix:
+        ros_distro: [humble]
+    container:
+      image: ros:${{ matrix.ros_distro }}-ros-base-jammy
+    env:
+      ROS_DISTRO: ${{ matrix.ros_distro }}
+    steps:
+      - name: Cache APT packages
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt/archives
+          key: apt-${{ runner.os }}-${{ matrix.ros_distro }}-${{ hashFiles('**/package.xml') }}
+          restore-keys: |
+            apt-${{ runner.os }}-${{ matrix.ros_distro }}-
 
-    # 12. サイクロマティック複雑度を計測して HTML 生成 ----------------------
-    - name: Generate cyclomatic complexity report
-      if: always()
-      shell: bash
-      working-directory: ros2_ws
-      run: |
-        mkdir -p complexity_html
-        lizard --html -o complexity_html/index.html src/${{ inputs['repo-path'] }}/src src/${{ inputs['repo-path'] }}/include
+      - name: Install coverage tooling (lcov + colcon plugin)
+        shell: bash
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            lcov python3-colcon-lcov-result python3-colcon-mixin
+          colcon mixin add default https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
+          colcon mixin update
 
-    # 13. 生成したレポートをまとめてアーティファクトとして保存 -------------
-    - name: Upload CI reports artifact
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: ci-reports-${{ matrix.ros_distro }}
-        path: |
-          ros2_ws/lcov
-          ros2_ws/gtest_html
-          ros2_ws/complexity_html
-        retention-days: 30
+      - name: Setup ROS
+        uses: ros-tooling/setup-ros@v0.7
+        with:
+          required-ros-distributions: ${{ env.ROS_DISTRO }}
+
+      - name: rosdep install
+        shell: bash
+        run: |
+          rosdep update -y
+          rosdep install --from-paths ros2_ws --ignore-src -r -y --rosdistro $ROS_DISTRO
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-${{ matrix.ros_distro }}
+          path: ros2_ws
+
+      - name: Initialise coverage counters
+        shell: bash
+        working-directory: ros2_ws
+        run: |
+          colcon lcov-result --initial
+
+      - name: colcon test
+        shell: bash
+        working-directory: ros2_ws
+        run: |
+          source install/setup.bash
+          colcon test --event-handlers console_direct+
+          colcon test-result --verbose
+
+      - name: Generate lcov report
+        shell: bash
+        working-directory: ros2_ws
+        run: |
+          colcon lcov-result
+          ls -R lcov | head -n 20
+
+      - name: Convert gtest results to HTML
+        if: always()
+        shell: bash
+        working-directory: ros2_ws
+        run: |
+          pip install --no-cache-dir junitparser junit2html
+          mkdir -p gtest_html
+          python3 - <<'EOF'
+          import glob
+          from junitparser import JUnitXml
+          merged = JUnitXml()
+          for path in glob.glob('build/**/test_results/**/*.xml', recursive=True):
+              merged += JUnitXml.fromfile(path)
+          merged.write('gtest_html/merged.xml')
+          EOF
+          junit2html gtest_html/merged.xml gtest_html/index.html
+
+      - name: Install lizard for complexity analysis
+        if: always()
+        shell: bash
+        run: |
+          pip install --no-cache-dir lizard
+
+      - name: Generate cyclomatic complexity report
+        if: always()
+        shell: bash
+        working-directory: ros2_ws
+        run: |
+          mkdir -p complexity_html
+          lizard --html -o complexity_html/index.html src/${{ inputs['repo-path'] }}/src src/${{ inputs['repo-path'] }}/include
+
+      - name: Upload CI reports artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-reports-${{ matrix.ros_distro }}
+          path: |
+            ros2_ws/lcov
+            ros2_ws/gtest_html
+            ros2_ws/complexity_html
+          retention-days: 30
+
