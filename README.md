@@ -1,29 +1,40 @@
-# Motion Control Mecanum Package
+# モーションコントロール Mecanum パッケージ
 
-This package provides a simple example of a mecanum wheel motion controller for ROS 2.
+このパッケージは、ROS 2 向けのメカナムホイール式モーションコントローラのサンプル実装です。CANopen DS402 プロトコルに対応したモータドライバを想定しており、速度指令や各種パラメータ設定を行うための API を提供します。
 
-### New Features
+## 主な機能
 
-* Support for setting the DS402 *Modes of Operation* object (`0x6060`).
-* Ability to command target velocity using Profile Velocity Mode (`0x60FF`).
-* Ability to configure the velocity threshold (`0x606F`).
-* Ability to configure the velocity window (`0x606D`).
-* Ability to configure the quick stop option code (`0x605A`).
-* Ability to configure the quick stop deceleration (`0x6085`).
-* Ability to configure the maximum torque limit (`0x6072`).
-* Ability to configure the profile acceleration (`0x6083`).
-* Ability to configure the profile deceleration (`0x6084`).
-* Ability to configure the end velocity (`0x6082`).
-* Ability to configure the profile velocity (`0x6081`).
-* Ability to read the torque actual value (`0x6077`).
-* Ability to read the velocity actual value (`0x606C`).
-* Servo ON/OFF services to control motor power state.
+- DS402 の *Modes of Operation* オブジェクト (`0x6060`) の設定
+- Profile Velocity Mode (`0x60FF`) を用いた目標速度指令
+- 速度しきい値 (`0x606F`)、速度ウィンドウ (`0x606D`) の設定
+- クイックストップオプション (`0x605A`) およびクイックストップ減速度 (`0x6085`) の設定
+- 最大トルク制限 (`0x6072`)、プロファイル加速度 (`0x6083`)、プロファイル減速度 (`0x6084`)
+- 終端速度 (`0x6082`)、プロファイル速度 (`0x6081`) の設定
+- 実トルク値 (`0x6077`) および実速度値 (`0x606C`) の取得
+- サーボ ON/OFF を行うサービスインタフェース
 
-### Reusable CI Workflow
+モーションコントローラノードは `geometry_msgs/msg/Twist` を受け取り、各モータへの指令値を計算します。`sensor_msgs/msg/JointState` と `nav_msgs/msg/Odometry` を発行し、TF もブロードキャストします。
 
-This repository exposes a reusable GitHub Actions workflow at
-`.github/workflows/ci.yml`. Other ROS 2 packages can invoke it using
-`workflow_call`:
+## ビルド方法
+
+```bash
+mkdir -p ~/ros2_ws/src
+cd ~/ros2_ws/src
+# 本リポジトリをクローン
+cd ..
+colcon build --packages-select motion-control-mecanum-pkg
+```
+
+ビルド後は以下のように起動できます。
+
+```bash
+source install/setup.bash
+ros2 launch motion-control-mecanum-pkg motion_control_mecanum_launch.py
+```
+
+## 再利用可能な CI ワークフロー
+
+このリポジトリには `.github/workflows/ci.yml` に定義された再利用可能な GitHub Actions ワークフローが含まれています。他の ROS 2 パッケージから `workflow_call` を用いて次のように呼び出せます。
 
 ```yaml
 name: CI
@@ -35,3 +46,4 @@ jobs:
     with:
       repo-path: <your-package-name>
 ```
+
