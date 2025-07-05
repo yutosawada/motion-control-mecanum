@@ -148,3 +148,21 @@ jobs:
           ros2_ws/gtest_html
           ros2_ws/complexity_html
         retention-days: 30
+
+  dispatch-to-repoB:
+    needs: build-and-test
+    if: ${{ needs.build-and-test.result == 'success' }} 
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repository Dispatch to test_repo
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.ACTION_DISPATCH_TOKEN }} 
+          repository: yutosawada/test_repo
+          event-type: my_dispatch                 
+          client-payload: |
+            {
+              "source_repo": "${{ github.repository }}",
+              "source_ref":  "${{ github.ref }}",
+              "source_sha":  "${{ github.sha }}"
+            }
